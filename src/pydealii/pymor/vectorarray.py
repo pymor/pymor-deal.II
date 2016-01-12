@@ -85,17 +85,15 @@ if HAVE_DEALII:
             return 0 if self.dim == 0 else self.impl.linfty_norm()
 
         def components(self, component_indices):
-            raise NotImplementedError()
+            if len(component_indices) == 0:
+                return np.array([], dtype=np.intc)
+            assert 0 <= np.min(component_indices)
+            assert np.max(component_indices) < self.dim
+            return np.array([self.impl[i] for i in component_indices])
 
         def amax(self):
-            # A = np.abs(self.impl.array())  # there seems to be no way in the interface to
-            #                                # compute amax without making a copy. also,
-            #                                # we need to check how things behave in the MPI
-            #                                # parallel case.
-            # max_ind = np.argmax(A)
-            # max_val = A[max_ind]
-            # return max_ind, max_val
-            raise NotImplementedError()
+            max_ind = np.argmax(self.impl)
+            return max_ind, self.impl[max_ind]
 
         def __add__(self, other):
             return DealIIVector(self.impl + other.impl)

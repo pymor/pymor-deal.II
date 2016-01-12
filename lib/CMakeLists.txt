@@ -11,7 +11,7 @@ IF(NOT ${deal.II_FOUND})
 ENDIF()
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
-project(DEALII_example)
+project(Deal.II_bindings)
 
 # Add a CMake parameter for choosing a desired Python version
 set(REQUIRED_PYTHON_VERSION "2.7" CACHE STRING "Python version to use for compiling the example library")
@@ -30,13 +30,12 @@ find_package(PythonLibs ${REQUIRED_PYTHON_VERSION} REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories(${PYTHON_INCLUDE_DIR})
 # pybind11 path
-include_directories(/home/r_milk01/fast_projekte/uni/paper/15_pymor_paper/local/include)
+set(PYBIND11_INLUCDE_DIR /home/r_milk01/fast_projekte/uni/paper/15_pymor_paper/local/include CACHE STRING "")
+include_directories(${PYBIND11_INLUCDE_DIR})
 
-foreach(_target dealii_bindings)
-    # Create the binding library
-    add_library(${_target} SHARED ${_target}.cc )
-    # Don't add a 'lib' prefix to the shared library
-    set_target_properties(${_target} PROPERTIES PREFIX "")
-    DEAL_II_SETUP_TARGET(${_target})
-    target_link_libraries(${_target} ${PYTHON_LIBRARY})
-endforeach(_target example elliptic)
+# Create the binding library
+add_library(pydealii_bindings SHARED bindings.cc )
+# Don't add a 'lib' prefix to the shared library
+set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
+DEAL_II_SETUP_TARGET(pydealii_bindings)
+target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})

@@ -6,7 +6,7 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    import dealii_bindings
+    import pydealii_bindings as pd2
     HAVE_DEALII = True
 except ImportError:
     HAVE_DEALII = False
@@ -37,12 +37,12 @@ if HAVE_DEALII:
             return cls(instance.impl)
 
         def copy(self, deep=False):
-            return type(self)(dealii_bindings.Vector(self.impl))
+            return type(self)(pd2.Vector(self.impl))
 
         @classmethod
         def make_zeros(cls, subtype):
             dim = subtype[0]
-            impl = dealii_bindings.Vector(dim)
+            impl = pd2.Vector(dim)
             return cls(impl)
 
         @property
@@ -72,7 +72,7 @@ if HAVE_DEALII:
                 self.impl.axpy(alpha, x.impl)
 
         def dot(self, other):
-            return self.impl * other.impl
+            return 0 if self.dim == 0 else self.impl * other.impl
 
         def l1_norm(self):
             # dealII throws an exception on 0 length norms

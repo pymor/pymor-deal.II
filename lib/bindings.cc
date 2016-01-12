@@ -86,8 +86,8 @@ public:
 };
 } // namespace dealii
 
-PYBIND11_PLUGIN(dealii_bindings) {
-  py::module m("dealii_bindings", "pybind11 elliptic plugin");
+PYBIND11_PLUGIN(pydealii_bindings) {
+  py::module m("pydealii_bindings", "pybind11 elliptic plugin");
 
   typedef double Number;
   typedef dealii::Vector<Number> NumberVector;

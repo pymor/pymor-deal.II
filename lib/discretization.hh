@@ -41,36 +41,36 @@ namespace dealii {
 
 typedef std::map<std::string, std::string> Parameter;
 
-class Discretization
-{
-  static constexpr size_t dim {2};
+class Discretization {
+  static constexpr size_t dim{2};
+
 public:
   Discretization();
   ~Discretization();
 
-  void setup_system ();
-  void assemble_system ();
-  void _solve ();
-  void visualize () const;
+  void setup_system();
+  void assemble_system();
+  void _solve();
+  void visualize() const;
 
   Vector<double> solve(const Parameter& mu);
 
   static pybind11::class_<Discretization> make_py_class(pybind11::module& module);
+
 protected:
-  Triangulation<dim>   triangulation;
-  DoFHandler<dim>      dof_handler;
+  Triangulation<dim> triangulation;
+  DoFHandler<dim> dof_handler;
 
-  FESystem<dim>        fe;
+  FESystem<dim> fe;
 
-  ConstraintMatrix     hanging_node_constraints;
+  ConstraintMatrix hanging_node_constraints;
 
-  SparsityPattern      sparsity_pattern;
+  SparsityPattern sparsity_pattern;
   SparseMatrix<double> system_matrix;
 
-  Vector<double>       solution;
-  Vector<double>       system_rhs;
+  Vector<double> solution;
+  Vector<double> system_rhs;
 };
-
 
 #endif // DISCRETIZATION_HH
 

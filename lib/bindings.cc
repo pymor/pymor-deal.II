@@ -216,6 +216,6 @@ PYBIND11_PLUGIN(pydealii_bindings) {
       .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>);
 
   auto disc = dealii::Discretization::make_py_class(m);
-  disc.def("solve", &dealii::Discretization::solve,  "doc");
+  disc.def("solve", &dealii::Discretization::solve, "doc");
   return m.ptr();
 }

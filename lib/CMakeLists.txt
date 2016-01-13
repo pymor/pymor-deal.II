@@ -34,7 +34,7 @@ set(PYBIND11_INLUCDE_DIR /home/r_milk01/fast_projekte/uni/paper/15_pymor_paper/l
 include_directories(${PYBIND11_INLUCDE_DIR})
 
 # Create the binding library
-add_library(pydealii_bindings SHARED bindings.cc )
+add_library(pydealii_bindings SHARED bindings.cc discretization.cc)
 # Don't add a 'lib' prefix to the shared library
 set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
 DEAL_II_SETUP_TARGET(pydealii_bindings)

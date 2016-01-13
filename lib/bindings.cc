@@ -5,6 +5,8 @@
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/base/logstream.h>
 
+#include "discretization.hh"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
@@ -212,5 +214,8 @@ PYBIND11_PLUGIN(pydealii_bindings) {
       .def("linfty_norm", &DoubleMatrix::linfty_norm)
       .def("vmult", &DoubleMatrix::vmult<NumberVector, NumberVector>)
       .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>);
+
+  auto disc = dealii::Discretization::make_py_class(m);
+  disc.def("solve", &dealii::Discretization::solve,  "doc");
   return m.ptr();
 }

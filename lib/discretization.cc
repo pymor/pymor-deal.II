@@ -258,7 +258,9 @@ namespace py = pybind11;
 
 py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::module& module) {
   py::class_<dealii::Discretization> disc(module, "Discretization");
-  disc.def(py::init<>());
-
+  disc.def(py::init<>())
+      .def("solve", &dealii::Discretization::solve)
+      .def("_solve", &dealii::Discretization::_solve)
+      .def("assemble_system", &dealii::Discretization::assemble_system);
   return disc;
 }

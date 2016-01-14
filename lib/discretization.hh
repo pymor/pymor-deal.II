@@ -48,11 +48,13 @@ public:
   Discretization();
   ~Discretization();
 
+private:
   void setup_system();
   void assemble_system();
   void _solve();
-  void visualize() const;
 
+public:
+  void visualize() const;
   Vector<double> solve(const Parameter& mu);
 
   static pybind11::class_<Discretization> make_py_class(pybind11::module& module);

@@ -54,24 +54,26 @@ private:
   void _solve();
 
 public:
-  void visualize() const;
-  Vector<double> solve(const Parameter& mu);
+  typedef double Number;
+  typedef Vector<Number> VectorType;
+  void visualize(const VectorType& solution_, std::string filename) const;
+  VectorType solve(const Parameter& mu);
 
   static pybind11::class_<Discretization> make_py_class(pybind11::module& module);
 
 protected:
-  Triangulation<dim> triangulation;
-  DoFHandler<dim> dof_handler;
+  Triangulation<dim> triangulation_;
+  DoFHandler<dim> dof_handler_;
 
-  FESystem<dim> fe;
+  FESystem<dim> fe_;
 
-  ConstraintMatrix hanging_node_constraints;
+  ConstraintMatrix hanging_node_constraints_;
 
-  SparsityPattern sparsity_pattern;
-  SparseMatrix<double> system_matrix;
+  SparsityPattern sparsity_pattern_;
+  SparseMatrix<Number> system_matrix_;
 
-  Vector<double> solution;
-  Vector<double> system_rhs;
+  Vector<Number> solution_;
+  Vector<Number> system_rhs_;
 };
 
 #endif // DISCRETIZATION_HH

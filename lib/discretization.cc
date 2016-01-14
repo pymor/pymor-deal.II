@@ -2,31 +2,31 @@
 
 #include <fstream>
 
-dealii::Discretization::Discretization()
+dealii::Discretization::Discretization(int refine_steps)
   : dof_handler_(triangulation_)
-  , fe_(FE_Q<dim>(1), dim) {}
+  , fe_(FE_Q<dim>(1), dim) {
+  GridGenerator::hyper_cube (triangulation_, -1, 1);
+  triangulation_.refine_global (refine_steps);
+}
 
 dealii::Discretization::~Discretization() { dof_handler_.clear(); }
 
 void dealii::Discretization::setup_system() {
   dof_handler_.distribute_dofs(fe_);
-  hanging_node_constraints_.clear();
-  DoFTools::make_hanging_node_constraints(dof_handler_, hanging_node_constraints_);
-  hanging_node_constraints_.close();
   sparsity_pattern_.reinit(dof_handler_.n_dofs(), dof_handler_.n_dofs(), dof_handler_.max_couplings_between_dofs());
   DoFTools::make_sparsity_pattern(dof_handler_, sparsity_pattern_);
 
-  hanging_node_constraints_.condense(sparsity_pattern_);
-
   sparsity_pattern_.compress();
 
-  system_matrix_.reinit(sparsity_pattern_);
+  full_system_matrix_.reinit(sparsity_pattern_);
+  lambda_system_matrix_.reinit(sparsity_pattern_);
+  mu_system_matrix_.reinit(sparsity_pattern_);
 
   solution_.reinit(dof_handler_.n_dofs());
   system_rhs_.reinit(dof_handler_.n_dofs());
 }
 
-void dealii::Discretization::assemble_system() {
+void dealii::Discretization::assemble_system(Parameter param) {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -35,8 +35,8 @@ void dealii::Discretization::assemble_system() {
   const unsigned int dofs_per_cell = fe_.dofs_per_cell;
   const unsigned int n_q_points = quadrature_formula.size();
 
-  FullMatrix<double> cell_matrix(dofs_per_cell, dofs_per_cell);
-  Vector<double> cell_rhs(dofs_per_cell);
+  FullMatrix<Number> lambda_cell_matrix(dofs_per_cell, dofs_per_cell), mu_cell_matrix(dofs_per_cell, dofs_per_cell);
+  Vector<Number> cell_rhs(dofs_per_cell);
 
   std::vector<types::global_dof_index> local_dof_indices(dofs_per_cell);
 
@@ -44,8 +44,8 @@ void dealii::Discretization::assemble_system() {
   // store the values of the coefficients at all the quadrature points on a
   // cell. In the present situation, we have two coefficients, lambda and
   // mu.
-  std::vector<double> lambda_values(n_q_points);
-  std::vector<double> mu_values(n_q_points);
+  std::vector<Number> lambda_values(n_q_points);
+  std::vector<Number> mu_values(n_q_points);
 
   // Well, we could as well have omitted the above two arrays since we will
   // use constant coefficients for both lambda and mu, which can be declared
@@ -53,7 +53,7 @@ void dealii::Discretization::assemble_system() {
   // value 1.0. Although we could omit the respective factors in the
   // assemblage of the matrix, we use them here for purpose of
   // demonstration.
-  ConstantFunction<dim> lambda(1.), mu(1.);
+  ConstantFunction<dim> lambda(param["lambda"][0]), mu(param["mu"][0]);
 
   // Then again, we need to have the same for the right hand side. This is
   // exactly as before in previous examples. However, we now have a
@@ -62,12 +62,13 @@ void dealii::Discretization::assemble_system() {
   // <code>n_q_points</code> elements, each of which is a
   // <code>Vector@<double@></code> with <code>dim</code> elements.
   RightHandSide<dim> right_hand_side;
-  std::vector<Vector<double>> rhs_values(n_q_points, Vector<double>(dim));
+  std::vector<Vector<Number>> rhs_values(n_q_points, Vector<Number>(dim));
 
   // Now we can begin with the loop over all cells:
   typename DoFHandler<dim>::active_cell_iterator cell = dof_handler_.begin_active(), endc = dof_handler_.end();
   for (; cell != endc; ++cell) {
-    cell_matrix = 0;
+    lambda_cell_matrix = 0;
+    mu_cell_matrix = 0;
     cell_rhs = 0;
 
     fe_values.reinit(cell);
@@ -108,7 +109,7 @@ void dealii::Discretization::assemble_system() {
         const unsigned int component_j = fe_.system_to_component_index(j).first;
 
         for (unsigned int q_point = 0; q_point < n_q_points; ++q_point) {
-          cell_matrix(i, j) +=
+          lambda_cell_matrix(i, j) +=
               // The first term is (lambda d_i u_i, d_j v_j) + (mu d_i
               // u_j, d_j v_i).  Note that
               // <code>shape_grad(i,q_point)</code> returns the
@@ -119,10 +120,11 @@ void dealii::Discretization::assemble_system() {
               // component of the i-th shape function with respect to
               // the comp(i)th coordinate is accessed by the appended
               // brackets.
-              ((fe_values.shape_grad(i, q_point)[component_i] * fe_values.shape_grad(j, q_point)[component_j] *
-                lambda_values[q_point]) +
-               (fe_values.shape_grad(i, q_point)[component_j] * fe_values.shape_grad(j, q_point)[component_i] *
-                mu_values[q_point]) +
+              fe_values.shape_grad(i, q_point)[component_i] * fe_values.shape_grad(j, q_point)[component_j] *
+                lambda_values[q_point] *
+              fe_values.JxW(q_point);
+          mu_cell_matrix(i, j) += (fe_values.shape_grad(i, q_point)[component_j] * fe_values.shape_grad(j, q_point)[component_i] *
+                mu_values[q_point] +
                // The second term is (mu nabla u_i, nabla v_j).  We
                // need not access a specific component of the
                // gradient, since we only have to compute the scalar
@@ -159,15 +161,15 @@ void dealii::Discretization::assemble_system() {
     // the entire linear system:
     cell->get_dof_indices(local_dof_indices);
     for (unsigned int i = 0; i < dofs_per_cell; ++i) {
-      for (unsigned int j = 0; j < dofs_per_cell; ++j)
-        system_matrix_.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i, j));
+      for (unsigned int j = 0; j < dofs_per_cell; ++j) {
+        lambda_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], lambda_cell_matrix(i, j));
+        mu_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], mu_cell_matrix(i, j));
+        full_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], mu_cell_matrix(i, j)+lambda_cell_matrix(i, j));
+      }
 
       system_rhs_(local_dof_indices[i]) += cell_rhs(i);
     }
   }
-
-  hanging_node_constraints_.condense(system_matrix_);
-  hanging_node_constraints_.condense(system_rhs_);
 
   // The interpolation of the boundary values needs a small modification:
   // since the solution function is vector-valued, so need to be the
@@ -178,9 +180,11 @@ void dealii::Discretization::assemble_system() {
   // object would represent a scalar function. Since the solution vector has
   // <code>dim</code> components, we need to pass <code>dim</code> as number
   // of components to the zero function as well.
-  std::map<types::global_dof_index, double> boundary_values;
+  std::map<types::global_dof_index, Number> boundary_values;
   VectorTools::interpolate_boundary_values(dof_handler_, 0, ZeroFunction<dim>(dim), boundary_values);
-  MatrixTools::apply_boundary_values(boundary_values, system_matrix_, solution_, system_rhs_);
+  MatrixTools::apply_boundary_values(boundary_values, full_system_matrix_, solution_, system_rhs_);
+  MatrixTools::apply_boundary_values(boundary_values, mu_system_matrix_, solution_, system_rhs_);
+  MatrixTools::apply_boundary_values(boundary_values, lambda_system_matrix_, solution_, system_rhs_);
 }
 
 void dealii::Discretization::_solve() {
@@ -188,14 +192,12 @@ void dealii::Discretization::_solve() {
   SolverCG<> cg(solver_control);
 
   PreconditionSSOR<> preconditioner;
-  preconditioner.initialize(system_matrix_, 1.2);
+  preconditioner.initialize(full_system_matrix_, 1.2);
 
-  cg.solve(system_matrix_, solution_, system_rhs_, preconditioner);
-
-  hanging_node_constraints_.distribute(solution_);
+  cg.solve(full_system_matrix_, solution_, system_rhs_, preconditioner);
 }
 
-void dealii::Discretization::visualize(const VectorType& ou, std::string filename) const {
+void dealii::Discretization::visualize(const VectorType& solution, std::string filename) const {
   std::ofstream output(filename);
 
   DataOut<dim> data_out;
@@ -247,20 +249,42 @@ void dealii::Discretization::visualize(const VectorType& ou, std::string filenam
   // function is only a shortcut for the function which we call here: it
   // puts the single string that is passed to it into a vector of strings
   // with only one element and forwards that to the other function.
-  data_out.add_data_vector(solution_, solution_names);
+  data_out.add_data_vector(solution, solution_names);
   data_out.build_patches();
   data_out.write_vtk(output);
 }
 
-dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Parameter& mu) { return VectorType(10); }
+dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {
+  setup_system();
+  assemble_system(param);
+  _solve();
+  return VectorType(solution_);
+}
 
 namespace py = pybind11;
 
 py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::module& module) {
   py::class_<dealii::Discretization> disc(module, "Discretization");
-  disc.def(py::init<>())
+  disc.def(py::init<int>(), py::arg("refine_steps") = 4u)
       .def("solve", &dealii::Discretization::solve)
-      .def("_solve", &dealii::Discretization::_solve)
-      .def("assemble_system", &dealii::Discretization::assemble_system);
+      .def("mu_mat", &dealii::Discretization::mu_mat)
+      .def("lambda_mat", &dealii::Discretization::lambda_mat)
+      .def("visualize", &dealii::Discretization::visualize)
+      .def("rhs", &dealii::Discretization::rhs);
   return disc;
+}
+
+const dealii::SparseMatrix<dealii::Discretization::Number> &dealii::Discretization::lambda_mat() const
+{
+  return lambda_system_matrix_;
+}
+
+const dealii::SparseMatrix<dealii::Discretization::Number> &dealii::Discretization::mu_mat() const
+{
+  return mu_system_matrix_;
+}
+
+const dealii::Vector<dealii::Discretization::Number> &dealii::Discretization::rhs() const
+{
+  return system_rhs_;
 }

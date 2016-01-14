@@ -39,27 +39,30 @@
 
 namespace dealii {
 
-typedef std::map<std::string, std::string> Parameter;
-
 class Discretization {
   static constexpr size_t dim{2};
 
 public:
-  Discretization();
+  Discretization(int refine_steps);
   ~Discretization();
+
+  typedef double Number;
+  typedef std::map<std::string, std::vector<Number>> Parameter;
+  typedef Vector<Number> VectorType;
+
+  void visualize(const VectorType& solution, std::string filename) const;
+  VectorType solve(const Parameter& param);
+
+  static pybind11::class_<Discretization> make_py_class(pybind11::module& module);
+
+  const SparseMatrix<Number>& lambda_mat() const;
+  const SparseMatrix<Number>& mu_mat() const;
+  const Vector<Number>& rhs() const;
 
 private:
   void setup_system();
-  void assemble_system();
+  void assemble_system(Parameter param);
   void _solve();
-
-public:
-  typedef double Number;
-  typedef Vector<Number> VectorType;
-  void visualize(const VectorType& solution_, std::string filename) const;
-  VectorType solve(const Parameter& mu);
-
-  static pybind11::class_<Discretization> make_py_class(pybind11::module& module);
 
 protected:
   Triangulation<dim> triangulation_;
@@ -67,10 +70,8 @@ protected:
 
   FESystem<dim> fe_;
 
-  ConstraintMatrix hanging_node_constraints_;
-
   SparsityPattern sparsity_pattern_;
-  SparseMatrix<Number> system_matrix_;
+  SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, full_system_matrix_;
 
   Vector<Number> solution_;
   Vector<Number> system_rhs_;

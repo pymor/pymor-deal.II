@@ -11,6 +11,7 @@ from numbers import Number
 from pymor.operators.basic import OperatorBase
 from pymor.operators.constructions import ZeroOperator
 from pydealii.pymor.vectorarray import DealIIVectorSpace
+import pydealii_bindings as pd2
 
 
 class DealIIMatrixOperator(OperatorBase):
@@ -19,10 +20,8 @@ class DealIIMatrixOperator(OperatorBase):
     linear = True
 
     def __init__(self, matrix, name=None):
-        assert matrix.rank() == 2
-        comm = matrix.mpi_comm()
-        self.source = DealIIVectorSpace(matrix.size(1))
-        self.range = DealIIVectorSpace(matrix.size(0))
+        self.source = DealIIVectorSpace(matrix.m())
+        self.range = DealIIVectorSpace(matrix.n())
         self.name = name
         self.matrix = matrix
 
@@ -59,22 +58,21 @@ class DealIIMatrixOperator(OperatorBase):
         vectors = V._list if ind is None else [V._list[ind]] if isinstance(ind, Number) else [V._list[i] for i in ind]
         R = self.source.zeros(len(vectors))
         for r, v in zip(R._list, vectors):
-            df.solve(self.matrix, r.impl, v.impl)
+            self.matrix.cg_solve(v.impl, r.impl)
         return R
 
     def assemble_lincomb(self, operators, coefficients, solver_options=None, name=None):
-        if not all(isinstance(op, (FenicsMatrixOperator, ZeroOperator)) for op in operators):
+        if not all(isinstance(op, (DealIIMatrixOperator, ZeroOperator)) for op in operators):
             return None
         assert not solver_options
 
-        if coefficients[0] == 1:
-            matrix = operators[0].matrix.copy()
-        else:
-            matrix = operators[0].matrix * coefficients[0]
+        matrix = pd2.SparseMatrix(operators[0].matrix.get_sparsity_pattern())
+        matrix.copy_from(operators[0].matrix)
+        matrix *= coefficients[0]
         for op, c in izip(operators[1:], coefficients[1:]):
             if isinstance(op, ZeroOperator):
                 continue
-            matrix.axpy(c, op.matrix, False)  # in general, we cannot assume the same nonzero pattern for
-                                              # all matrices. how to improve this?
+            matrix.add(c, op.matrix)  # in general, we cannot assume the same nonzero pattern for
+                                      # all matrices. how to improve this?
 
-        return FenicsMatrixOperator(matrix, name=name)
+        return DealIIMatrixOperator(matrix, name=name)

@@ -179,7 +179,23 @@ public:
     PYBIND11_OVERLOAD_NO_RETURN(SparseMatrix<Number>, reinit, pattern);
   }
 
+  SparseMatrix<Number> &
+  copy_from_same (const SparseMatrix<Number> &source) {
+    return BaseType::copy_from(source);
+  }
+
   Number* data() { return BaseType::val; }
+
+  void cg_solve(Vector<Number>& solution, const Vector<Number>& rhs) {
+    SolverControl solver_control(1000, 1e-12);
+    SolverCG<> solver(solver_control);
+    solver.solve(*this, solution, rhs, PreconditionIdentity());
+
+    // We have made one addition, though: since we suppress output from the
+    // linear solvers, we have to print the number of iterations by hand.
+    std::cout << "   " << solver_control.last_step() << " CG iterations needed to obtain convergence." << std::endl;
+  }
+
 
   static pybind11::class_<PySparseMatrix<Number>> make_py_class(pybind11::module& module) {
     typedef dealii::PySparseMatrix<double> PyDoubleMatrix;
@@ -189,11 +205,20 @@ public:
         .alias<DoubleMatrix>()
         .def(py::init<>())
         .def(py::init<const SparsityPattern&>())
+        .def(py::self *= Number())
+        .def("n", &DoubleMatrix::n)
+        .def("m", &DoubleMatrix::m)
         .def("clear", &DoubleMatrix::clear)
         .def("l1_norm", &DoubleMatrix::l1_norm)
         .def("linfty_norm", &DoubleMatrix::linfty_norm)
         .def("vmult", &DoubleMatrix::vmult<NumberVector, NumberVector>)
-        .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>);
+        .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>)
+        .def("copy_from_same", &PyDoubleMatrix::copy_from_same)
+        .def("get_sparsity_pattern", &DoubleMatrix::get_sparsity_pattern, py::return_value_policy::reference)
+        .def("add", (void (DoubleMatrix::*)(Number, const DoubleMatrix&))&DoubleMatrix::add<Number>)
+        .def("copy_from", (DoubleMatrix& (DoubleMatrix::*)(const DoubleMatrix&))&DoubleMatrix::copy_from<Number>)
+        .def("cg_solve", &PyDoubleMatrix::cg_solve)
+        ;
   }
 };
 
@@ -205,6 +230,7 @@ PYBIND11_PLUGIN(pydealii_bindings) {
   typedef dealii::PySparseMatrix<double> PyDoubleMatrix;
 
   py::module m("pydealii_bindings", "pybind11 elliptic plugin");
+  py::class_<dealii::SparsityPattern> sp(m, "SparsityPattern");
   auto vec = PyNumberVector::make_py_class(m);
   // moving this to fac methods does not compile
   vec.alias<dealii::Vector<Number>>();

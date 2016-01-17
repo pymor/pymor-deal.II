@@ -5,8 +5,8 @@
 dealii::Discretization::Discretization(int refine_steps)
   : dof_handler_(triangulation_)
   , fe_(FE_Q<dim>(1), dim) {
-  GridGenerator::hyper_cube (triangulation_, -1, 1);
-  triangulation_.refine_global (refine_steps);
+  GridGenerator::hyper_cube(triangulation_, -1, 1);
+  triangulation_.refine_global(refine_steps);
 }
 
 dealii::Discretization::~Discretization() { dof_handler_.clear(); }
@@ -121,10 +121,10 @@ void dealii::Discretization::assemble_system(Parameter param) {
               // the comp(i)th coordinate is accessed by the appended
               // brackets.
               fe_values.shape_grad(i, q_point)[component_i] * fe_values.shape_grad(j, q_point)[component_j] *
-                lambda_values[q_point] *
-              fe_values.JxW(q_point);
-          mu_cell_matrix(i, j) += (fe_values.shape_grad(i, q_point)[component_j] * fe_values.shape_grad(j, q_point)[component_i] *
-                mu_values[q_point] +
+              lambda_values[q_point] * fe_values.JxW(q_point);
+          mu_cell_matrix(i, j) +=
+              (fe_values.shape_grad(i, q_point)[component_j] * fe_values.shape_grad(j, q_point)[component_i] *
+                   mu_values[q_point] +
                // The second term is (mu nabla u_i, nabla v_j).  We
                // need not access a specific component of the
                // gradient, since we only have to compute the scalar
@@ -164,7 +164,8 @@ void dealii::Discretization::assemble_system(Parameter param) {
       for (unsigned int j = 0; j < dofs_per_cell; ++j) {
         lambda_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], lambda_cell_matrix(i, j));
         mu_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], mu_cell_matrix(i, j));
-        full_system_matrix_.add(local_dof_indices[i], local_dof_indices[j], mu_cell_matrix(i, j)+lambda_cell_matrix(i, j));
+        full_system_matrix_.add(local_dof_indices[i], local_dof_indices[j],
+                                mu_cell_matrix(i, j) + lambda_cell_matrix(i, j));
       }
 
       system_rhs_(local_dof_indices[i]) += cell_rhs(i);
@@ -267,24 +268,19 @@ py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::mod
   py::class_<dealii::Discretization> disc(module, "Discretization");
   disc.def(py::init<int>(), py::arg("refine_steps") = 4u)
       .def("solve", &dealii::Discretization::solve)
-      .def("mu_mat", &dealii::Discretization::mu_mat)
-      .def("lambda_mat", &dealii::Discretization::lambda_mat)
-      .def("visualize", &dealii::Discretization::visualize)
-      .def("rhs", &dealii::Discretization::rhs);
+      .def("mu_mat", &dealii::Discretization::mu_mat, py::return_value_policy::reference_internal)
+      .def("lambda_mat", &dealii::Discretization::lambda_mat, py::return_value_policy::reference_internal)
+      .def("visualize", &dealii::Discretization::visualize, py::return_value_policy::reference_internal)
+      .def("rhs", &dealii::Discretization::rhs, py::return_value_policy::reference_internal);
   return disc;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number> &dealii::Discretization::lambda_mat() const
-{
+const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::lambda_mat() const {
   return lambda_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number> &dealii::Discretization::mu_mat() const
-{
+const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::mu_mat() const {
   return mu_system_matrix_;
 }
 
-const dealii::Vector<dealii::Discretization::Number> &dealii::Discretization::rhs() const
-{
-  return system_rhs_;
-}
+const dealii::Vector<dealii::Discretization::Number>& dealii::Discretization::rhs() const { return system_rhs_; }

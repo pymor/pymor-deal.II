@@ -58,7 +58,7 @@ class DealIIMatrixOperator(OperatorBase):
         vectors = V._list if ind is None else [V._list[ind]] if isinstance(ind, Number) else [V._list[i] for i in ind]
         R = self.source.zeros(len(vectors))
         for r, v in zip(R._list, vectors):
-            self.matrix.cg_solve(v.impl, r.impl)
+            self.matrix.cg_solve(r.impl, v.impl)
         return R
 
     def assemble_lincomb(self, operators, coefficients, solver_options=None, name=None):
@@ -74,5 +74,4 @@ class DealIIMatrixOperator(OperatorBase):
                 continue
             matrix.add(c, op.matrix)  # in general, we cannot assume the same nonzero pattern for
                                       # all matrices. how to improve this?
-
         return DealIIMatrixOperator(matrix, name=name)

@@ -48,16 +48,13 @@ public:
   typedef Number value_type;
   typedef std::vector<const SparseMatrix<Number>*> Matrices;
   MatrixSum(Matrices&& m)
-    : matrices_(m)
-  {
-    assert(m.size()>0);
+    : matrices_(m) {
+    assert(m.size() > 0);
   }
 
   template <class OutVector, class InVector>
-  void vmult (OutVector &dst,
-              const InVector &src) const
-  {
-    for(auto&& matrix : matrices_) {
+  void vmult(OutVector& dst, const InVector& src) const {
+    for (auto&& matrix : matrices_) {
       assert(matrix);
       matrix->vmult_add(dst, src);
     }

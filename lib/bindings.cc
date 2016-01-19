@@ -179,8 +179,6 @@ public:
     PYBIND11_OVERLOAD_NO_RETURN(SparseMatrix<Number>, reinit, pattern);
   }
 
-
-
   Number* data() { return BaseType::val; }
 
   void cg_solve(Vector<Number>& solution, const Vector<Number>& rhs) {
@@ -193,7 +191,6 @@ public:
     std::cout << "   " << solver_control.last_step() << " CG iterations needed to obtain convergence." << std::endl;
   }
 
-
   static pybind11::class_<PySparseMatrix<Number>> make_py_class(pybind11::module& module) {
     typedef dealii::PySparseMatrix<double> PyDoubleMatrix;
     typedef dealii::SparseMatrix<double> DoubleMatrix;
@@ -203,18 +200,17 @@ public:
         .def(py::init<>())
         .def(py::init<const SparsityPattern&>())
         .def(py::self *= Number())
-        .def("n", [](const DoubleMatrix &mat) { return 0 ? mat.empty() : mat.n(); })
-        .def("m", [](const DoubleMatrix &mat) { return 0 ? mat.empty() : mat.m(); })
+        .def("n", [](const DoubleMatrix& mat) { return 0 ? mat.empty() : mat.n(); })
+        .def("m", [](const DoubleMatrix& mat) { return 0 ? mat.empty() : mat.m(); })
         .def("clear", &DoubleMatrix::clear)
         .def("l1_norm", &DoubleMatrix::l1_norm)
         .def("linfty_norm", &DoubleMatrix::linfty_norm)
         .def("vmult", &DoubleMatrix::vmult<NumberVector, NumberVector>)
         .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>)
         .def("get_sparsity_pattern", &DoubleMatrix::get_sparsity_pattern, py::return_value_policy::reference)
-        .def("add", (void (DoubleMatrix::*)(Number, const DoubleMatrix&))&DoubleMatrix::add<Number>)
-        .def("copy_from", (DoubleMatrix& (DoubleMatrix::*)(const DoubleMatrix&))&DoubleMatrix::copy_from<Number>)
-        .def("cg_solve", &PyDoubleMatrix::cg_solve)
-        ;
+        .def("add", (void (DoubleMatrix::*)(Number, const DoubleMatrix&)) & DoubleMatrix::add<Number>)
+        .def("copy_from", (DoubleMatrix & (DoubleMatrix::*)(const DoubleMatrix&)) & DoubleMatrix::copy_from<Number>)
+        .def("cg_solve", &PyDoubleMatrix::cg_solve);
   }
 };
 

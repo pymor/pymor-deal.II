@@ -53,9 +53,8 @@ void dealii::Discretization::assemble_h1() {
         const unsigned int component_j = fe_.system_to_component_index(j).first;
 
         for (unsigned int q_point = 0; q_point < n_q_points; ++q_point) {
-          h1_cell_matrix(i, j) +=
-              fe_values.shape_grad(i, q_point)[component_i] * fe_values.shape_grad(j, q_point)[component_j] *
-              fe_values.JxW(q_point);
+          h1_cell_matrix(i, j) += fe_values.shape_grad(i, q_point)[component_i] *
+                                  fe_values.shape_grad(j, q_point)[component_j] * fe_values.JxW(q_point);
         }
       }
     }
@@ -63,10 +62,8 @@ void dealii::Discretization::assemble_h1() {
     cell->get_dof_indices(local_dof_indices);
     for (unsigned int i = 0; i < dofs_per_cell; ++i) {
       for (unsigned int j = 0; j < dofs_per_cell; ++j) {
-        h1_matrix_.add(local_dof_indices[i], local_dof_indices[j],
-                                h1_cell_matrix(i, j));
+        h1_matrix_.add(local_dof_indices[i], local_dof_indices[j], h1_cell_matrix(i, j));
       }
-
     }
   }
 
@@ -304,7 +301,7 @@ void dealii::Discretization::visualize(const VectorType& solution, std::string f
   data_out.write_vtk(output);
 }
 
-dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {  
+dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {
   assemble_system(param);
   _solve();
   return VectorType(solution_);
@@ -319,7 +316,8 @@ py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::mod
       .def("h1_mat", &dealii::Discretization::h1_mat, py::return_value_policy::reference_internal)
       .def("mu_mat", &dealii::Discretization::mu_mat, py::return_value_policy::reference_internal)
       .def("lambda_mat", &dealii::Discretization::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &dealii::Discretization::visualize, py::arg("solution"), py::arg("filename"), py::return_value_policy::reference_internal)
+      .def("visualize", &dealii::Discretization::visualize, py::arg("solution"), py::arg("filename"),
+           py::return_value_policy::reference_internal)
       .def("rhs", &dealii::Discretization::rhs, py::return_value_policy::reference_internal);
   return disc;
 }
@@ -332,8 +330,7 @@ const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretizati
   return mu_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number> &dealii::Discretization::h1_mat() const
-{
+const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::h1_mat() const {
   return h1_matrix_;
 }
 

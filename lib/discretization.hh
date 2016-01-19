@@ -32,12 +32,40 @@
 #include <pybind11/operators.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-
 #include <pybind11/pybind11.h>
+
+#include <functional>
 
 #include "rhs.hh"
 
 namespace dealii {
+
+//! Wrapper intended for use w/ CG algorithms
+template <class Number>
+class MatrixSum : public virtual Subscriptor {
+
+public:
+  typedef Number value_type;
+  typedef std::vector<const SparseMatrix<Number>*> Matrices;
+  MatrixSum(Matrices&& m)
+    : matrices_(m)
+  {
+    assert(m.size()>0);
+  }
+
+  template <class OutVector, class InVector>
+  void vmult (OutVector &dst,
+              const InVector &src) const
+  {
+    for(auto&& matrix : matrices_) {
+      assert(matrix);
+      matrix->vmult_add(dst, src);
+    }
+  }
+
+private:
+  const Matrices matrices_;
+};
 
 class Discretization {
   static constexpr size_t dim{2};
@@ -57,10 +85,12 @@ public:
 
   const SparseMatrix<Number>& lambda_mat() const;
   const SparseMatrix<Number>& mu_mat() const;
+  const SparseMatrix<Number>& h1_mat() const;
   const Vector<Number>& rhs() const;
 
 private:
   void setup_system();
+  void assemble_h1();
   void assemble_system(Parameter param);
   void _solve();
 
@@ -71,7 +101,7 @@ protected:
   FESystem<dim> fe_;
 
   SparsityPattern sparsity_pattern_;
-  SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, full_system_matrix_;
+  SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, h1_matrix_;
 
   Vector<Number> solution_;
   Vector<Number> system_rhs_;

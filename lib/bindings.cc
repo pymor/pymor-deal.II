@@ -179,10 +179,7 @@ public:
     PYBIND11_OVERLOAD_NO_RETURN(SparseMatrix<Number>, reinit, pattern);
   }
 
-  SparseMatrix<Number> &
-  copy_from_same (const SparseMatrix<Number> &source) {
-    return BaseType::copy_from(source);
-  }
+
 
   Number* data() { return BaseType::val; }
 
@@ -206,14 +203,13 @@ public:
         .def(py::init<>())
         .def(py::init<const SparsityPattern&>())
         .def(py::self *= Number())
-        .def("n", &DoubleMatrix::n)
-        .def("m", &DoubleMatrix::m)
+        .def("n", [](const DoubleMatrix &mat) { return 0 ? mat.empty() : mat.n(); })
+        .def("m", [](const DoubleMatrix &mat) { return 0 ? mat.empty() : mat.m(); })
         .def("clear", &DoubleMatrix::clear)
         .def("l1_norm", &DoubleMatrix::l1_norm)
         .def("linfty_norm", &DoubleMatrix::linfty_norm)
         .def("vmult", &DoubleMatrix::vmult<NumberVector, NumberVector>)
         .def("Tvmult", &DoubleMatrix::Tvmult<NumberVector, NumberVector>)
-        .def("copy_from_same", &PyDoubleMatrix::copy_from_same)
         .def("get_sparsity_pattern", &DoubleMatrix::get_sparsity_pattern, py::return_value_policy::reference)
         .def("add", (void (DoubleMatrix::*)(Number, const DoubleMatrix&))&DoubleMatrix::add<Number>)
         .def("copy_from", (DoubleMatrix& (DoubleMatrix::*)(const DoubleMatrix&))&DoubleMatrix::copy_from<Number>)

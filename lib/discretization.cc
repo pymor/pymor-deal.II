@@ -7,6 +7,7 @@ dealii::Discretization::Discretization(int refine_steps)
   , fe_(FE_Q<dim>(1), dim) {
   GridGenerator::hyper_cube(triangulation_, -1, 1);
   triangulation_.refine_global(refine_steps);
+  setup_system();
 }
 
 dealii::Discretization::~Discretization() { dof_handler_.clear(); }
@@ -189,7 +190,7 @@ void dealii::Discretization::assemble_system(Parameter param) {
 }
 
 void dealii::Discretization::_solve() {
-  SolverControl solver_control(1000, 1e-12);
+  SolverControl solver_control(1000, 1e-8);
   SolverCG<> cg(solver_control);
 
   PreconditionSSOR<> preconditioner;
@@ -255,8 +256,7 @@ void dealii::Discretization::visualize(const VectorType& solution, std::string f
   data_out.write_vtk(output);
 }
 
-dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {
-  setup_system();
+dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {  
   assemble_system(param);
   _solve();
   return VectorType(solution_);
@@ -270,7 +270,7 @@ py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::mod
       .def("solve", &dealii::Discretization::solve)
       .def("mu_mat", &dealii::Discretization::mu_mat, py::return_value_policy::reference_internal)
       .def("lambda_mat", &dealii::Discretization::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &dealii::Discretization::visualize, py::return_value_policy::reference_internal)
+      .def("visualize", &dealii::Discretization::visualize, py::arg("solution"), py::arg("filename"), py::return_value_policy::reference_internal)
       .def("rhs", &dealii::Discretization::rhs, py::return_value_policy::reference_internal);
   return disc;
 }

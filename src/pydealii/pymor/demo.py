@@ -24,7 +24,7 @@ class PyVis(object):
     def visualize(self, U, _, filename):
         self._cpp_disc.visualize(U._list[0].impl, filename)
 
-cpp_disc = CppDiscretization(refine_steps=6)
+cpp_disc = CppDiscretization(refine_steps=7)
 
 param = {"lambda": [1.], "mu": [1.]}
 u = cpp_disc.solve(param)
@@ -36,18 +36,21 @@ lambda_fn, mu_fn = [GenericParameterFunctional(lambda mu: mu[n], Parameter({n: [
 ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat', 'mu_mat']]
 op = LincombOperator(ops, (lambda_fn, mu_fn))
 rhs = VectorFunctional(ListVectorArray([DealIIVector(cpp_disc.rhs())]))
-
+viz = PyVis(cpp_disc)
 py_disc = StationaryDiscretization(op, rhs, products=None,
-                                   visualizer=PyVis(cpp_disc),
-                                   parameter_space=CubicParameterSpace(parameter_type, 0.5, 1.5))
+                                   visualizer=viz,
+                                   parameter_space=CubicParameterSpace(parameter_type, 1e-10, 100))
 
-greedy_data = greedy(py_disc, reduce_stationary_affine_linear, py_disc.parameter_space.sample_uniformly(5),
+greedy_data = greedy(py_disc, reduce_stationary_affine_linear, py_disc.parameter_space.sample_uniformly(3),
                      use_estimator=False,
-                     extension_algorithm=gram_schmidt_basis_extension, max_extensions=5)
+                     extension_algorithm=gram_schmidt_basis_extension, max_extensions=3)
 rb_disc, reconstructor = greedy_data['reduced_discretization'], greedy_data['reconstructor']
 
-new_param = {"lambda": [0.8], "mu": [1.2]}
-for disc, n in [(cpp_disc, 'cpp'),(rb_disc, 'rb')]:
-    with Timer(n):
+new_param = {"lambda": [5.], "mu": [100.4]}
+for disc, s in [(cpp_disc, 'cpp'), (py_disc, 'py'), (rb_disc, 'rb')]:
+    with Timer(s):
         solution = disc.solve(new_param)
-        disc.visualize(solution, 'param_{}.vtk'.format(n))
+        try:
+            disc.visualize(solution, filename='param_{}.vtk'.format(s))
+        except NotImplementedError:
+            py_disc.visualize(reconstructor.reconstruct(solution), filename='param_{}.vtk'.format(s))

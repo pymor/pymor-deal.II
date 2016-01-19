@@ -1,5 +1,8 @@
 #include "discretization.hh"
 
+#include <deal.II/lac/solver_cg.h>
+#include <deal.II/lac/solver_bicgstab.h>
+
 #include <fstream>
 
 dealii::Discretization::Discretization(int refine_steps)
@@ -232,13 +235,14 @@ void dealii::Discretization::assemble_system(Parameter param) {
 
 void dealii::Discretization::_solve() {
   SolverControl solver_control(1000, 1e-8);
+//  SolverBicgstab<> cg(solver_control);
   SolverCG<> cg(solver_control);
 
-  MatrixSum<Number> sum({&lambda_system_matrix_, &mu_system_matrix_});
+  MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_});
 
   //  PreconditionSSOR<MatrixSum<Number>> preconditioner;
   //  preconditioner.initialize(sum, 1.2);
-
+  const auto& sum = msum.sum();
   PreconditionIdentity preconditioner;
   preconditioner.initialize(sum);
   cg.solve(sum, solution_, system_rhs_, preconditioner);

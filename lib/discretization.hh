@@ -7,7 +7,6 @@
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
-#include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/precondition.h>
 #include <deal.II/lac/constraint_matrix.h>
 #include <deal.II/grid/tria.h>
@@ -50,6 +49,9 @@ public:
   MatrixSum(Matrices&& m)
     : matrices_(m) {
     assert(m.size() > 0);
+    sum_.reinit(matrices_[0]->get_sparsity_pattern());
+    sum_.copy_from(*matrices_[0]);
+    sum_.add(1., *matrices_[1]);
   }
 
   template <class OutVector, class InVector>
@@ -60,8 +62,13 @@ public:
     }
   }
 
+  const SparseMatrix<Number>& sum() {
+    return sum_;
+  }
+
 private:
   const Matrices matrices_;
+  SparseMatrix<Number> sum_;
 };
 
 class Discretization {

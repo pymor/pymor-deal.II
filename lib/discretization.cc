@@ -240,11 +240,11 @@ void dealii::Discretization::_solve() {
 
   MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_});
 
-  //  PreconditionSSOR<MatrixSum<Number>> preconditioner;
-  //  preconditioner.initialize(sum, 1.2);
+//  PreconditionIdentity preconditioner;
+//  preconditioner.initialize(sum, 1.2);
   const auto& sum = msum.sum();
-  PreconditionIdentity preconditioner;
-  preconditioner.initialize(sum);
+  PreconditionSSOR<> preconditioner;
+  preconditioner.initialize(sum, 1.2);
   cg.solve(sum, solution_, system_rhs_, preconditioner);
 }
 

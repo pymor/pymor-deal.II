@@ -1,4 +1,5 @@
 import timeit
+from functools import partial
 
 from pymor.algorithms.greedy import greedy
 from pymor.parameters.base import Parameter
@@ -37,20 +38,27 @@ ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat'
 op = LincombOperator(ops, (lambda_fn, mu_fn))
 rhs = VectorFunctional(ListVectorArray([DealIIVector(cpp_disc.rhs())]))
 viz = PyVis(cpp_disc)
-py_disc = StationaryDiscretization(op, rhs, products=None,
+h1_op = DealIIMatrixOperator(cpp_disc.h1_mat(), "h1_0_semi")
+py_disc = StationaryDiscretization(op, rhs, products={"h1_0_semi": h1_op},
                                    visualizer=viz,
-                                   parameter_space=CubicParameterSpace(parameter_type, 1e-10, 100))
+                                   parameter_space=CubicParameterSpace(parameter_type, 1e-8, 1e7))
 
 greedy_data = greedy(py_disc, reduce_stationary_affine_linear, py_disc.parameter_space.sample_uniformly(3),
                      use_estimator=False,
                      extension_algorithm=gram_schmidt_basis_extension, max_extensions=3)
 rb_disc, reconstructor = greedy_data['reduced_discretization'], greedy_data['reconstructor']
 
-new_param = {"lambda": [5.], "mu": [100.4]}
-for disc, s in [(cpp_disc, 'cpp'), (py_disc, 'py'), (rb_disc, 'rb')]:
-    with Timer(s):
-        solution = disc.solve(new_param)
-        try:
-            disc.visualize(solution, filename='param_{}.vtk'.format(s))
-        except NotImplementedError:
-            py_disc.visualize(reconstructor.reconstruct(solution), filename='param_{}.vtk'.format(s))
+for new_param in ({"lambda": [1.], "mu": [1e7]},  {"lambda": [1.], "mu": [1.]},  {"lambda": [1.], "mu": [1e-8]},
+                  {"lambda": [1e-8], "mu": [1.]},  {"lambda": [1e7], "mu": [1]}, {"lambda": [1e-8], "mu": [1e-8]}):
+    for disc, s in [(cpp_disc, 'cpp'), (py_disc, 'py'), (rb_disc, 'rb')]:
+        with Timer(s):
+            solution = disc.solve(new_param)
+            try:
+                disc.visualize(solution, filename='param_{}-{}.vtk'.format(new_param,s))
+            except NotImplementedError:
+                py_disc.visualize(reconstructor.reconstruct(solution), filename='param_{}-{}.vtk'.format(new_param,s))
+            try:
+                fr = disc.h1_0_semi_norm(solution)
+                print('Param: {}\nNorm: {}'.format(new_param,fr))
+            except AttributeError as a:
+                continue

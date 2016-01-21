@@ -57,8 +57,6 @@ for new_param in ({"lambda": [1.], "mu": [1e7]},  {"lambda": [1.], "mu": [1.]}, 
                 disc.visualize(solution, filename='param_{}-{}.vtk'.format(new_param,s))
             except NotImplementedError:
                 py_disc.visualize(reconstructor.reconstruct(solution), filename='param_{}-{}.vtk'.format(new_param,s))
-            try:
-                fr = disc.h1_0_semi_norm(solution)
-                print('Param: {}\nNorm: {}'.format(new_param,fr))
-            except AttributeError as a:
-                continue
+
+            fr = disc.h1_0_semi_norm(solution)
+            print('Type: {}\nParam: {}\nNorm: {}'.format(s, new_param, fr))

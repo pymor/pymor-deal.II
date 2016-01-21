@@ -92,6 +92,8 @@ public:
   const SparseMatrix<Number>& h1_mat() const;
   const Vector<Number>& rhs() const;
 
+  Number h1_0_semi_norm(const Vector<Number>& v) const;
+
 private:
   void setup_system();
   void assemble_h1();

@@ -322,6 +322,7 @@ py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::mod
       .def("lambda_mat", &dealii::Discretization::lambda_mat, py::return_value_policy::reference_internal)
       .def("visualize", &dealii::Discretization::visualize, py::arg("solution"), py::arg("filename"),
            py::return_value_policy::reference_internal)
+      .def("h1_0_semi_norm", &dealii::Discretization::h1_0_semi_norm)
       .def("rhs", &dealii::Discretization::rhs, py::return_value_policy::reference_internal);
   return disc;
 }
@@ -339,3 +340,8 @@ const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretizati
 }
 
 const dealii::Vector<dealii::Discretization::Number>& dealii::Discretization::rhs() const { return system_rhs_; }
+
+dealii::Discretization::Number dealii::Discretization::h1_0_semi_norm(const Vector<Number>& v) const
+{
+  return h1_matrix_.matrix_norm_square(v);
+}

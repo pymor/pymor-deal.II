@@ -46,12 +46,16 @@ class MatrixSum : public virtual Subscriptor {
 public:
   typedef Number value_type;
   typedef std::vector<const SparseMatrix<Number>*> Matrices;
-  MatrixSum(Matrices&& m)
+  MatrixSum(Matrices&& m, std::vector<Number> weights)
     : matrices_(m) {
     assert(m.size() > 0);
+    assert(m.size() == weights.size());
     sum_.reinit(matrices_[0]->get_sparsity_pattern());
     sum_.copy_from(*matrices_[0]);
-    sum_.add(1., *matrices_[1]);
+    sum_ *= weights[0];
+    for (size_t i = 1; i < m.size(); ++i) {
+      sum_.add(weights[i], *matrices_[1]);
+    }
   }
 
   template <class OutVector, class InVector>
@@ -62,7 +66,11 @@ public:
     }
   }
 
-  const SparseMatrix<Number>& sum() {
+  SparseMatrix<Number>& sum() {
+    return sum_;
+  }
+
+  const SparseMatrix<Number>& sum() const{
     return sum_;
   }
 
@@ -97,8 +105,8 @@ public:
 private:
   void setup_system();
   void assemble_h1();
-  void assemble_system(Parameter param);
-  void _solve();
+  void assemble_system();
+  void _solve(Parameter param, VectorType &solution);
 
 protected:
   Triangulation<dim> triangulation_;
@@ -108,9 +116,7 @@ protected:
 
   SparsityPattern sparsity_pattern_;
   SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, h1_matrix_;
-
-  Vector<Number> solution_;
-  Vector<Number> system_rhs_;
+  Vector<Number> system_rhs_, tmp_data_;
 };
 
 #endif // DISCRETIZATION_HH

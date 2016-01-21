@@ -12,6 +12,7 @@ dealii::Discretization::Discretization(int refine_steps)
   triangulation_.refine_global(refine_steps);
   setup_system();
   assemble_h1();
+  assemble_system();
 }
 
 dealii::Discretization::~Discretization() { dof_handler_.clear(); }
@@ -26,9 +27,8 @@ void dealii::Discretization::setup_system() {
   h1_matrix_.reinit(sparsity_pattern_);
   lambda_system_matrix_.reinit(sparsity_pattern_);
   mu_system_matrix_.reinit(sparsity_pattern_);
-
-  solution_.reinit(dof_handler_.n_dofs());
   system_rhs_.reinit(dof_handler_.n_dofs());
+  tmp_data_.reinit(dof_handler_.n_dofs());
 }
 
 void dealii::Discretization::assemble_h1() {
@@ -71,10 +71,11 @@ void dealii::Discretization::assemble_h1() {
   }
 
   std::map<types::global_dof_index, Number> boundary_values;
-  MatrixTools::apply_boundary_values(boundary_values, h1_matrix_, solution_, system_rhs_);
+  VectorTools::interpolate_boundary_values(dof_handler_, 0, ZeroFunction<dim>(dim), boundary_values);
+  MatrixTools::apply_boundary_values(boundary_values, h1_matrix_, tmp_data_, system_rhs_);
 }
 
-void dealii::Discretization::assemble_system(Parameter param) {
+void dealii::Discretization::assemble_system() {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -101,7 +102,7 @@ void dealii::Discretization::assemble_system(Parameter param) {
   // value 1.0. Although we could omit the respective factors in the
   // assemblage of the matrix, we use them here for purpose of
   // demonstration.
-  ConstantFunction<dim> lambda(param["lambda"][0]), mu(param["mu"][0]);
+  ConstantFunction<dim> lambda(1), mu(1);
 
   // Then again, we need to have the same for the right hand side. This is
   // exactly as before in previous examples. However, we now have a
@@ -217,7 +218,6 @@ void dealii::Discretization::assemble_system(Parameter param) {
       system_rhs_(local_dof_indices[i]) += cell_rhs(i);
     }
   }
-
   // The interpolation of the boundary values needs a small modification:
   // since the solution function is vector-valued, so need to be the
   // boundary values. The <code>ZeroFunction</code> constructor accepts a
@@ -229,23 +229,28 @@ void dealii::Discretization::assemble_system(Parameter param) {
   // of components to the zero function as well.
   std::map<types::global_dof_index, Number> boundary_values;
   VectorTools::interpolate_boundary_values(dof_handler_, 0, ZeroFunction<dim>(dim), boundary_values);
-  MatrixTools::apply_boundary_values(boundary_values, mu_system_matrix_, solution_, system_rhs_);
-  MatrixTools::apply_boundary_values(boundary_values, lambda_system_matrix_, solution_, system_rhs_);
+  MatrixTools::apply_boundary_values(boundary_values, mu_system_matrix_, tmp_data_, system_rhs_);
+  MatrixTools::apply_boundary_values(boundary_values, lambda_system_matrix_, tmp_data_, system_rhs_);
+
 }
 
-void dealii::Discretization::_solve() {
+void dealii::Discretization::_solve(Parameter param, VectorType& solution) {
   SolverControl solver_control(1000, 1e-8);
 //  SolverBicgstab<> cg(solver_control);
   SolverCG<> cg(solver_control);
 
-  MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_});
+
+  Number lambda(param["lambda"][0]), mu(param["mu"][0]);
+  std::cout << "L " << lambda << " M " << mu;
+  MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_}, {lambda, mu});
 
 //  PreconditionIdentity preconditioner;
 //  preconditioner.initialize(sum, 1.2);
-  const auto& sum = msum.sum();
+  auto& sum = msum.sum();
+//  MatrixTools::apply_boundary_values(boundary_values, sum, solution, system_rhs_);
   PreconditionSSOR<> preconditioner;
   preconditioner.initialize(sum, 1.2);
-  cg.solve(sum, solution_, system_rhs_, preconditioner);
+  cg.solve(sum, solution, system_rhs_, preconditioner);
 }
 
 void dealii::Discretization::visualize(const VectorType& solution, std::string filename) const {
@@ -306,9 +311,8 @@ void dealii::Discretization::visualize(const VectorType& solution, std::string f
 }
 
 dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {
-  assemble_system(param);
-  _solve();
-  return VectorType(solution_);
+  _solve(param, tmp_data_);
+  return VectorType(tmp_data_);
 }
 
 namespace py = pybind11;
@@ -343,5 +347,5 @@ const dealii::Vector<dealii::Discretization::Number>& dealii::Discretization::rh
 
 dealii::Discretization::Number dealii::Discretization::h1_0_semi_norm(const Vector<Number>& v) const
 {
-  return h1_matrix_.matrix_norm_square(v);
+  return std::sqrt(h1_matrix_.matrix_norm_square(v));
 }

@@ -40,9 +40,10 @@
 namespace dealii {
 
 class ElasticityExample {
-  static constexpr size_t dim{2};
 
 public:
+  static constexpr size_t dim{2};
+
   ElasticityExample(int refine_steps);
   ~ElasticityExample();
 
@@ -79,6 +80,12 @@ protected:
   SparsityPattern sparsity_pattern_;
   SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, h1_matrix_;
   Vector<Number> system_rhs_, tmp_data_;
+};
+
+class ElasticityEoc : public ElasticityExample {
+public:
+  //! max refine should be > 2
+  ElasticityEoc(int max_refine, Parameter param);
 };
 
 #endif // DISCRETIZATION_HH

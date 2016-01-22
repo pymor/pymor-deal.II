@@ -2,6 +2,7 @@
 
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/solver_bicgstab.h>
+#include <deal.II/numerics/solution_transfer.h>
 
 #include <fstream>
 
@@ -384,4 +385,26 @@ dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(cons
 dealii::ElasticityExample::Number
 dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::Number>& v) const {
   return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
+}
+
+dealii::ElasticityEoc::ElasticityEoc(int max_refine, dealii::ElasticityExample::Parameter param)
+  : dealii::ElasticityExample(2)
+{
+  SolutionTransfer<dim,VectorType> trans(dof_handler_);
+  auto last_sol = solve(param);
+  std::vector<Number> norms;
+
+  for (int i = 2; i < max_refine; ++i)
+  {
+    triangulation_.prepare_coarsening_and_refinement();
+    trans.prepare_for_coarsening_and_refinement(last_sol);
+    triangulation_.refine_global(1);
+
+    VectorType last_sol_refined(dof_handler_.n_dofs());
+    trans.refine_interpolate(last_sol, last_sol_refined);
+    auto current_sol = solve(param);
+    last_sol_refined -= current_sol;
+    norms.push_back(h1_0_semi_norm(last_sol_refined));
+    last_sol = current_sol;
+  }
 }

@@ -45,6 +45,14 @@ dealii::ElasticityExample::ElasticityExample(int refine_steps)
 
 dealii::ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
 
+void dealii::ElasticityExample::visualize(const std::vector<dealii::ElasticityExample::VectorType> &solutions, std::vector<std::__cxx11::string> filenames) const
+{
+  assert(solutions.size()==filenames.size());
+  for(size_t i = 0; i < solutions.size(); ++i) {
+    _visualize(solutions[i], filenames[i]);
+  }
+}
+
 void dealii::ElasticityExample::setup_system() {
   dof_handler_.distribute_dofs(fe_);
   sparsity_pattern_.reinit(dof_handler_.n_dofs(), dof_handler_.n_dofs(), dof_handler_.max_couplings_between_dofs());
@@ -275,7 +283,7 @@ void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   cg.solve(sum, solution, system_rhs_, preconditioner);
 }
 
-void dealii::ElasticityExample::visualize(const VectorType& solution, std::string filename) const {
+void dealii::ElasticityExample::_visualize(const VectorType& solution, std::string filename) const {
   std::ofstream output(filename);
 
   DataOut<dim> data_out;

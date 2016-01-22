@@ -1,6 +1,9 @@
 import timeit
 from functools import partial
 
+import itertools
+from pymor.reductors.stationary import reduce_stationary_coercive
+
 from pymor.algorithms.greedy import greedy
 from pymor.parameters.base import Parameter
 from pymor.parameters.spaces import CubicParameterSpace
@@ -28,28 +31,34 @@ class PyVis(object):
 cpp_disc = ElasticityExample(refine_steps=7)
 
 param = {"lambda": [1.], "mu": [1.]}
-u = cpp_disc.solve(param)
+# u = cpp_disc.solve(param)
 parameter_type = Parameter(param).parameter_type
-cpp_disc.visualize(u, "highdim_solution_cpp.vtk")
+# cpp_disc.visualize(u, "highdim_solution_cpp.vtk")
 
 lambda_fn, mu_fn = [GenericParameterFunctional(lambda mu: mu[n], Parameter({n: [1.]}).parameter_type) for n in ['lambda', 'mu']]
-
+LOW, HIGH = 18e-3, 3e-0
 ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat', 'mu_mat']]
 op = LincombOperator(ops, (lambda_fn, mu_fn))
 rhs = VectorFunctional(ListVectorArray([DealIIVector(cpp_disc.rhs())]))
 viz = PyVis(cpp_disc)
 h1_op = DealIIMatrixOperator(cpp_disc.h1_mat(), "h1_0_semi")
-py_disc = StationaryDiscretization(op, rhs, products={"h1_0_semi": h1_op},
+energy_op = DealIIMatrixOperator(cpp_disc.mu_mat(), "energy")
+py_disc = StationaryDiscretization(op, rhs, products={"energy": energy_op},
                                    visualizer=viz,
-                                   parameter_space=CubicParameterSpace(parameter_type, 1e-8, 1e7))
+                                   parameter_space=CubicParameterSpace(parameter_type, LOW, HIGH))
 
-greedy_data = greedy(py_disc, reduce_stationary_affine_linear, py_disc.parameter_space.sample_uniformly(3),
-                     use_estimator=False,
+coercivity_estimator = ExpressionParameterFunctional("max(mu)", parameter_type)
+reductor = partial(reduce_stationary_coercive,
+                   error_product=energy_op, coercivity_estimator=coercivity_estimator)
+
+greedy_data = greedy(py_disc, reductor, py_disc.parameter_space.sample_uniformly(3),
+                     use_estimator=True,
                      extension_algorithm=gram_schmidt_basis_extension, max_extensions=3)
 rb_disc, reconstructor = greedy_data['reduced_discretization'], greedy_data['reconstructor']
 
-for new_param in ({"lambda": [1.], "mu": [1e7]},  {"lambda": [1.], "mu": [1.]},  {"lambda": [1.], "mu": [1e-8]},
-                  {"lambda": [1e-8], "mu": [1.]},  {"lambda": [1e7], "mu": [1]}, {"lambda": [1e-8], "mu": [1e-8]}):
+half = (HIGH - LOW) / 2.
+values = itertools.product((LOW, HIGH, half), (LOW, HIGH, half))
+for new_param in ({"lambda": [a], "mu": [b]} for a, b in values):
     for disc, s in [(cpp_disc, 'cpp'), (py_disc, 'py'), (rb_disc, 'rb')]:
         with Timer(s):
             solution = disc.solve(new_param)
@@ -58,5 +67,5 @@ for new_param in ({"lambda": [1.], "mu": [1e7]},  {"lambda": [1.], "mu": [1.]}, 
             except NotImplementedError:
                 py_disc.visualize(reconstructor.reconstruct(solution), filename='param_{}-{}.vtk'.format(new_param,s))
 
-            fr = disc.h1_0_semi_norm(solution)
+            fr = disc.energy_norm(solution)
             print('Type: {}\nParam: {}\nNorm: {}'.format(s, new_param, fr))

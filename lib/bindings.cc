@@ -3,6 +3,7 @@
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/compressed_sparsity_pattern.h>
 #include <deal.II/lac/solver_cg.h>
+#include <deal.II/lac/solver_bicgstab.h>
 #include <deal.II/base/logstream.h>
 
 #include "discretization.hh"
@@ -182,9 +183,11 @@ public:
   Number* data() { return BaseType::val; }
 
   void cg_solve(Vector<Number>& solution, const Vector<Number>& rhs) {
-    SolverControl solver_control(1000, 1e-12);
+    SolverControl solver_control(2000, 1e-12);
     SolverCG<> solver(solver_control);
-    solver.solve(*this, solution, rhs, PreconditionIdentity());
+    PreconditionSSOR<> preconditioner;
+    preconditioner.initialize(*this, 1.2);
+    solver.solve(*this, solution, rhs, preconditioner);
 
     // We have made one addition, though: since we suppress output from the
     // linear solvers, we have to print the number of iterations by hand.

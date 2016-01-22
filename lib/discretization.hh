@@ -101,6 +101,7 @@ public:
   const Vector<Number>& rhs() const;
 
   Number h1_0_semi_norm(const Vector<Number>& v) const;
+  Number energy_norm(const Vector<Number>& v) const;
 
 private:
   void setup_system();

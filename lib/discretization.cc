@@ -235,7 +235,7 @@ void dealii::ElasticityExample::assemble_system() {
 }
 
 void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
-  SolverControl solver_control(1000, 1e-8);
+  SolverControl solver_control(2000, 1e-12);
 //  SolverBicgstab<> cg(solver_control);
   SolverCG<> cg(solver_control);
 
@@ -327,6 +327,7 @@ py::class_<dealii::ElasticityExample> dealii::ElasticityExample::make_py_class(p
       .def("visualize", &dealii::ElasticityExample::visualize, py::arg("solution"), py::arg("filename"),
            py::return_value_policy::reference_internal)
       .def("h1_0_semi_norm", &dealii::ElasticityExample::h1_0_semi_norm)
+      .def("energy_norm", &dealii::ElasticityExample::energy_norm)
       .def("rhs", &dealii::ElasticityExample::rhs, py::return_value_policy::reference_internal);
   return disc;
 }
@@ -348,4 +349,9 @@ const dealii::Vector<dealii::ElasticityExample::Number>& dealii::ElasticityExamp
 dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const
 {
   return std::sqrt(h1_matrix_.matrix_norm_square(v));
+}
+
+dealii::ElasticityExample::Number dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::Number> &v) const
+{
+  return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
 }

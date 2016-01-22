@@ -13,7 +13,7 @@ from pymor.reductors.linear import reduce_stationary_affine_linear
 from pymor.discretizations.basic import StationaryDiscretization
 from pymor.tools.timing import Timer
 
-from pydealii_bindings import Discretization as CppDiscretization
+from pydealii_bindings import ElasticityExample
 from pydealii.pymor.operator import DealIIMatrixOperator
 from pydealii.pymor.vectorarray import DealIIVector
 
@@ -25,7 +25,7 @@ class PyVis(object):
     def visualize(self, U, _, filename):
         self._cpp_disc.visualize(U._list[0].impl, filename)
 
-cpp_disc = CppDiscretization(refine_steps=7)
+cpp_disc = ElasticityExample(refine_steps=7)
 
 param = {"lambda": [1.], "mu": [1.]}
 u = cpp_disc.solve(param)

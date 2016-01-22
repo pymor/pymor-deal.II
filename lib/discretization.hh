@@ -79,12 +79,12 @@ private:
   SparseMatrix<Number> sum_;
 };
 
-class Discretization {
+class ElasticityExample {
   static constexpr size_t dim{2};
 
 public:
-  Discretization(int refine_steps);
-  ~Discretization();
+  ElasticityExample(int refine_steps);
+  ~ElasticityExample();
 
   typedef double Number;
   typedef std::map<std::string, std::vector<Number>> Parameter;
@@ -93,7 +93,7 @@ public:
   void visualize(const VectorType& solution, std::string filename) const;
   VectorType solve(const Parameter& param);
 
-  static pybind11::class_<Discretization> make_py_class(pybind11::module& module);
+  static pybind11::class_<ElasticityExample> make_py_class(pybind11::module& module);
 
   const SparseMatrix<Number>& lambda_mat() const;
   const SparseMatrix<Number>& mu_mat() const;

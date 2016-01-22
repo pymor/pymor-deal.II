@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-dealii::Discretization::Discretization(int refine_steps)
+dealii::ElasticityExample::ElasticityExample(int refine_steps)
   : dof_handler_(triangulation_)
   , fe_(FE_Q<dim>(1), dim) {
   GridGenerator::hyper_cube(triangulation_, -1, 1);
@@ -15,9 +15,9 @@ dealii::Discretization::Discretization(int refine_steps)
   assemble_system();
 }
 
-dealii::Discretization::~Discretization() { dof_handler_.clear(); }
+dealii::ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
 
-void dealii::Discretization::setup_system() {
+void dealii::ElasticityExample::setup_system() {
   dof_handler_.distribute_dofs(fe_);
   sparsity_pattern_.reinit(dof_handler_.n_dofs(), dof_handler_.n_dofs(), dof_handler_.max_couplings_between_dofs());
   DoFTools::make_sparsity_pattern(dof_handler_, sparsity_pattern_);
@@ -31,7 +31,7 @@ void dealii::Discretization::setup_system() {
   tmp_data_.reinit(dof_handler_.n_dofs());
 }
 
-void dealii::Discretization::assemble_h1() {
+void dealii::ElasticityExample::assemble_h1() {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -75,7 +75,7 @@ void dealii::Discretization::assemble_h1() {
   MatrixTools::apply_boundary_values(boundary_values, h1_matrix_, tmp_data_, system_rhs_);
 }
 
-void dealii::Discretization::assemble_system() {
+void dealii::ElasticityExample::assemble_system() {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -234,7 +234,7 @@ void dealii::Discretization::assemble_system() {
 
 }
 
-void dealii::Discretization::_solve(Parameter param, VectorType& solution) {
+void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   SolverControl solver_control(1000, 1e-8);
 //  SolverBicgstab<> cg(solver_control);
   SolverCG<> cg(solver_control);
@@ -253,7 +253,7 @@ void dealii::Discretization::_solve(Parameter param, VectorType& solution) {
   cg.solve(sum, solution, system_rhs_, preconditioner);
 }
 
-void dealii::Discretization::visualize(const VectorType& solution, std::string filename) const {
+void dealii::ElasticityExample::visualize(const VectorType& solution, std::string filename) const {
   std::ofstream output(filename);
 
   DataOut<dim> data_out;
@@ -310,42 +310,42 @@ void dealii::Discretization::visualize(const VectorType& solution, std::string f
   data_out.write_vtk(output);
 }
 
-dealii::Discretization::VectorType dealii::Discretization::solve(const dealii::Discretization::Parameter& param) {
+dealii::ElasticityExample::VectorType dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& param) {
   _solve(param, tmp_data_);
   return VectorType(tmp_data_);
 }
 
 namespace py = pybind11;
 
-py::class_<dealii::Discretization> dealii::Discretization::make_py_class(py::module& module) {
-  py::class_<dealii::Discretization> disc(module, "Discretization");
+py::class_<dealii::ElasticityExample> dealii::ElasticityExample::make_py_class(py::module& module) {
+  py::class_<dealii::ElasticityExample> disc(module, "ElasticityExample");
   disc.def(py::init<int>(), py::arg("refine_steps") = 4u)
-      .def("solve", &dealii::Discretization::solve)
-      .def("h1_mat", &dealii::Discretization::h1_mat, py::return_value_policy::reference_internal)
-      .def("mu_mat", &dealii::Discretization::mu_mat, py::return_value_policy::reference_internal)
-      .def("lambda_mat", &dealii::Discretization::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &dealii::Discretization::visualize, py::arg("solution"), py::arg("filename"),
+      .def("solve", &dealii::ElasticityExample::solve)
+      .def("h1_mat", &dealii::ElasticityExample::h1_mat, py::return_value_policy::reference_internal)
+      .def("mu_mat", &dealii::ElasticityExample::mu_mat, py::return_value_policy::reference_internal)
+      .def("lambda_mat", &dealii::ElasticityExample::lambda_mat, py::return_value_policy::reference_internal)
+      .def("visualize", &dealii::ElasticityExample::visualize, py::arg("solution"), py::arg("filename"),
            py::return_value_policy::reference_internal)
-      .def("h1_0_semi_norm", &dealii::Discretization::h1_0_semi_norm)
-      .def("rhs", &dealii::Discretization::rhs, py::return_value_policy::reference_internal);
+      .def("h1_0_semi_norm", &dealii::ElasticityExample::h1_0_semi_norm)
+      .def("rhs", &dealii::ElasticityExample::rhs, py::return_value_policy::reference_internal);
   return disc;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::lambda_mat() const {
+const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::lambda_mat() const {
   return lambda_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::mu_mat() const {
+const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::mu_mat() const {
   return mu_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::Discretization::Number>& dealii::Discretization::h1_mat() const {
+const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::h1_mat() const {
   return h1_matrix_;
 }
 
-const dealii::Vector<dealii::Discretization::Number>& dealii::Discretization::rhs() const { return system_rhs_; }
+const dealii::Vector<dealii::ElasticityExample::Number>& dealii::ElasticityExample::rhs() const { return system_rhs_; }
 
-dealii::Discretization::Number dealii::Discretization::h1_0_semi_norm(const Vector<Number>& v) const
+dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const
 {
   return std::sqrt(h1_matrix_.matrix_norm_square(v));
 }

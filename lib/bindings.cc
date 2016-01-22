@@ -227,7 +227,7 @@ PYBIND11_PLUGIN(pydealii_bindings) {
   // moving this to fac methods does not compile
   vec.alias<dealii::Vector<Number>>();
   auto mat = PyDoubleMatrix::make_py_class(m);
-  auto disc = dealii::Discretization::make_py_class(m);
+  auto disc = dealii::ElasticityExample::make_py_class(m);
 
   return m.ptr();
 }

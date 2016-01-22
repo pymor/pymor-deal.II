@@ -5,6 +5,34 @@
 
 #include <fstream>
 
+//! Wrapper intended for use w/ CG algorithms
+template <class Number>
+class MatrixSum {
+
+public:
+  typedef Number value_type;
+  typedef std::vector<const dealii::SparseMatrix<Number>*> Matrices;
+  MatrixSum(Matrices&& m, std::vector<Number> weights)
+    : matrices_(m) {
+    assert(m.size() > 0);
+    assert(m.size() == weights.size());
+    sum_.reinit(matrices_[0]->get_sparsity_pattern());
+    sum_.copy_from(*matrices_[0]);
+    sum_ *= weights[0];
+    for (size_t i = 1; i < m.size(); ++i) {
+      sum_.add(weights[i], *matrices_[1]);
+    }
+  }
+
+  dealii::SparseMatrix<Number>& sum() { return sum_; }
+
+  const dealii::SparseMatrix<Number>& sum() const { return sum_; }
+
+private:
+  const Matrices matrices_;
+  dealii::SparseMatrix<Number> sum_;
+};
+
 dealii::ElasticityExample::ElasticityExample(int refine_steps)
   : dof_handler_(triangulation_)
   , fe_(FE_Q<dim>(1), dim) {
@@ -231,23 +259,17 @@ void dealii::ElasticityExample::assemble_system() {
   VectorTools::interpolate_boundary_values(dof_handler_, 0, ZeroFunction<dim>(dim), boundary_values);
   MatrixTools::apply_boundary_values(boundary_values, mu_system_matrix_, tmp_data_, system_rhs_);
   MatrixTools::apply_boundary_values(boundary_values, lambda_system_matrix_, tmp_data_, system_rhs_);
-
 }
 
 void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   SolverControl solver_control(2000, 1e-12);
-//  SolverBicgstab<> cg(solver_control);
   SolverCG<> cg(solver_control);
-
 
   Number lambda(param["lambda"][0]), mu(param["mu"][0]);
   std::cout << "L " << lambda << " M " << mu;
   MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_}, {lambda, mu});
 
-//  PreconditionIdentity preconditioner;
-//  preconditioner.initialize(sum, 1.2);
   auto& sum = msum.sum();
-//  MatrixTools::apply_boundary_values(boundary_values, sum, solution, system_rhs_);
   PreconditionSSOR<> preconditioner;
   preconditioner.initialize(sum, 1.2);
   cg.solve(sum, solution, system_rhs_, preconditioner);
@@ -310,7 +332,8 @@ void dealii::ElasticityExample::visualize(const VectorType& solution, std::strin
   data_out.write_vtk(output);
 }
 
-dealii::ElasticityExample::VectorType dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& param) {
+dealii::ElasticityExample::VectorType
+dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& param) {
   _solve(param, tmp_data_);
   return VectorType(tmp_data_);
 }
@@ -346,12 +369,11 @@ const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::Elasticit
 
 const dealii::Vector<dealii::ElasticityExample::Number>& dealii::ElasticityExample::rhs() const { return system_rhs_; }
 
-dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const
-{
+dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const {
   return std::sqrt(h1_matrix_.matrix_norm_square(v));
 }
 
-dealii::ElasticityExample::Number dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::Number> &v) const
-{
+dealii::ElasticityExample::Number
+dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::Number>& v) const {
   return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
 }

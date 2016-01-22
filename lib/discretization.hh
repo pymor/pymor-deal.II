@@ -39,46 +39,6 @@
 
 namespace dealii {
 
-//! Wrapper intended for use w/ CG algorithms
-template <class Number>
-class MatrixSum : public virtual Subscriptor {
-
-public:
-  typedef Number value_type;
-  typedef std::vector<const SparseMatrix<Number>*> Matrices;
-  MatrixSum(Matrices&& m, std::vector<Number> weights)
-    : matrices_(m) {
-    assert(m.size() > 0);
-    assert(m.size() == weights.size());
-    sum_.reinit(matrices_[0]->get_sparsity_pattern());
-    sum_.copy_from(*matrices_[0]);
-    sum_ *= weights[0];
-    for (size_t i = 1; i < m.size(); ++i) {
-      sum_.add(weights[i], *matrices_[1]);
-    }
-  }
-
-  template <class OutVector, class InVector>
-  void vmult(OutVector& dst, const InVector& src) const {
-    for (auto&& matrix : matrices_) {
-      assert(matrix);
-      matrix->vmult_add(dst, src);
-    }
-  }
-
-  SparseMatrix<Number>& sum() {
-    return sum_;
-  }
-
-  const SparseMatrix<Number>& sum() const{
-    return sum_;
-  }
-
-private:
-  const Matrices matrices_;
-  SparseMatrix<Number> sum_;
-};
-
 class ElasticityExample {
   static constexpr size_t dim{2};
 
@@ -107,7 +67,7 @@ private:
   void setup_system();
   void assemble_h1();
   void assemble_system();
-  void _solve(Parameter param, VectorType &solution);
+  void _solve(Parameter param, VectorType& solution);
 
 protected:
   Triangulation<dim> triangulation_;

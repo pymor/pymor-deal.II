@@ -39,3 +39,7 @@ add_library(pydealii_bindings SHARED bindings.cc discretization.cc)
 set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
 DEAL_II_SETUP_TARGET(pydealii_bindings)
 target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})
+
+add_executable(elastic_eoc elastic_eoc.cc discretization.cc)
+DEAL_II_SETUP_TARGET(elastic_eoc)
+target_link_libraries(elastic_eoc ${PYTHON_LIBRARY})

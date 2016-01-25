@@ -231,6 +231,7 @@ PYBIND11_PLUGIN(pydealii_bindings) {
   vec.alias<dealii::Vector<Number>>();
   auto mat = PyDoubleMatrix::make_py_class(m);
   auto disc = dealii::ElasticityExample::make_py_class(m);
+  auto eoc = dealii::ElasticityEoc::make_py_class(m);
 
   return m.ptr();
 }

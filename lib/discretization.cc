@@ -38,10 +38,7 @@ dealii::ElasticityExample::ElasticityExample(int refine_steps)
   : dof_handler_(triangulation_)
   , fe_(FE_Q<dim>(1), dim) {
   GridGenerator::hyper_cube(triangulation_, -1, 1);
-  triangulation_.refine_global(refine_steps);
-  setup_system();
-  assemble_h1();
-  assemble_system();
+  refine_global(refine_steps);
 }
 
 dealii::ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
@@ -55,6 +52,7 @@ void dealii::ElasticityExample::visualize(const std::vector<dealii::ElasticityEx
 }
 
 void dealii::ElasticityExample::setup_system() {
+  dof_handler_.clear();
   dof_handler_.distribute_dofs(fe_);
   sparsity_pattern_.reinit(dof_handler_.n_dofs(), dof_handler_.n_dofs(), dof_handler_.max_couplings_between_dofs());
   DoFTools::make_sparsity_pattern(dof_handler_, sparsity_pattern_);
@@ -274,8 +272,8 @@ void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   SolverControl solver_control(2000, 1e-12);
   SolverCG<> cg(solver_control);
 
-  Number lambda(param["lambda"][0]), mu(param["mu"][0]);
-  std::cout << "L " << lambda << " M " << mu;
+  deallog << "Solving for " << dof_handler_.n_dofs() << " unknowns" << std::endl;
+  Number lambda(param["lambda"][0]), mu(param["mu"][0]); 
   MatrixSum<Number> msum({&lambda_system_matrix_, &mu_system_matrix_}, {lambda, mu});
 
   auto& sum = msum.sum();
@@ -341,6 +339,14 @@ void dealii::ElasticityExample::_visualize(const VectorType& solution, std::stri
   data_out.write_vtk(output);
 }
 
+void dealii::ElasticityExample::refine_global(int refine_steps)
+{
+  triangulation_.refine_global(refine_steps);
+  setup_system();
+  assemble_h1();
+  assemble_system();
+}
+
 dealii::ElasticityExample::VectorType
 dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& param) {
   _solve(param, tmp_data_);
@@ -387,24 +393,49 @@ dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::N
   return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
 }
 
-dealii::ElasticityEoc::ElasticityEoc(int max_refine, dealii::ElasticityExample::Parameter param)
-  : dealii::ElasticityExample(2)
+dealii::ElasticityEoc::ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param)
+  : dealii::ElasticityExample(min_refine)
+  ,  max_refine_(max_refine)
+  , param_(param)
 {
-  SolutionTransfer<dim,VectorType> trans(dof_handler_);
-  auto last_sol = solve(param);
-  std::vector<Number> norms;
+}
 
-  for (int i = 2; i < max_refine; ++i)
+std::vector<std::pair<dealii::ElasticityExample::Number, dealii::ElasticityExample::Number> > dealii::ElasticityEoc::run()
+{
+  auto last_sol = solve(param_);
+  std::vector<Number> norms;
+  std::vector<Number> relative_norms;
+
+  for (int i = 0; i < max_refine_; ++i)
   {
     triangulation_.prepare_coarsening_and_refinement();
+    SolutionTransfer<dim,VectorType> trans(dof_handler_);
     trans.prepare_for_coarsening_and_refinement(last_sol);
-    triangulation_.refine_global(1);
+    refine_global(1);
 
     VectorType last_sol_refined(dof_handler_.n_dofs());
-    trans.refine_interpolate(last_sol, last_sol_refined);
-    auto current_sol = solve(param);
+    trans.interpolate(last_sol, last_sol_refined);
+    auto current_sol = solve(param_);
     last_sol_refined -= current_sol;
-    norms.push_back(h1_0_semi_norm(last_sol_refined));
+    const auto h1 = h1_0_semi_norm(last_sol_refined);
+    norms.push_back(h1);
+    relative_norms.push_back(h1/h1_0_semi_norm(current_sol));
     last_sol = current_sol;
   }
+
+  std::vector<std::pair<Number,Number>> eoc;
+  for (int i = 1; i < max_refine_; ++i)
+  {
+    eoc.emplace_back(std::log(norms[i]/norms[i-1])/std::log(2), std::log(relative_norms[i]/relative_norms[i-1])/std::log(2));
+  }
+
+  return eoc;
+}
+
+pybind11::class_<dealii::ElasticityEoc> dealii::ElasticityEoc::make_py_class(pybind11::module &module)
+{
+  py::class_<dealii::ElasticityEoc> eoc(module, "ElasticityEoc");
+  eoc.def(py::init<int, int, dealii::ElasticityExample::Parameter>())
+      .def("run", &dealii::ElasticityEoc::run);
+  return eoc;
 }

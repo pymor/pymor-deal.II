@@ -72,6 +72,8 @@ private:
   void _visualize(const VectorType& solution, std::string filename) const;
 
 protected:
+  void refine_global(int refine_steps = 1);
+
   Triangulation<dim> triangulation_;
   DoFHandler<dim> dof_handler_;
 
@@ -85,7 +87,15 @@ protected:
 class ElasticityEoc : public ElasticityExample {
 public:
   //! max refine should be > 2
-  ElasticityEoc(int max_refine, Parameter param);
+  ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param);
+
+  std::vector<std::pair<Number,Number>> run();
+
+  static pybind11::class_<ElasticityEoc> make_py_class(pybind11::module& module);
+
+private:
+  const dealii::ElasticityExample::Parameter param_;
+  const int max_refine_;
 };
 
 #endif // DISCRETIZATION_HH

@@ -366,6 +366,7 @@ py::class_<dealii::ElasticityExample> dealii::ElasticityExample::make_py_class(p
            py::return_value_policy::reference_internal)
       .def("h1_0_semi_norm", &dealii::ElasticityExample::h1_0_semi_norm)
       .def("energy_norm", &dealii::ElasticityExample::energy_norm)
+      .def("transfer_to", &dealii::ElasticityExample::transfer_to)
       .def("rhs", &dealii::ElasticityExample::rhs, py::return_value_policy::reference_internal);
   return disc;
 }

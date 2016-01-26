@@ -64,6 +64,8 @@ public:
   Number h1_0_semi_norm(const Vector<Number>& v) const;
   Number energy_norm(const Vector<Number>& v) const;
 
+  VectorType transfer_to(int refine_steps, const VectorType& v);
+
 private:
   void setup_system();
   void assemble_h1();
@@ -84,18 +86,20 @@ protected:
   Vector<Number> system_rhs_, tmp_data_;
 };
 
-class ElasticityEoc : public ElasticityExample {
+class ElasticityEoc {
 public:
   //! max refine should be > 2
   ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param);
 
+  typedef ElasticityExample::Number Number;
+  typedef ElasticityExample::VectorType VectorType;
   std::vector<std::pair<Number,Number>> run();
 
   static pybind11::class_<ElasticityEoc> make_py_class(pybind11::module& module);
 
 private:
-  const dealii::ElasticityExample::Parameter param_;
   const int max_refine_;
+  const dealii::ElasticityExample::Parameter param_;
 };
 
 #endif // DISCRETIZATION_HH

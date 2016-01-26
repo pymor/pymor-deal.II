@@ -393,40 +393,52 @@ dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::N
   return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
 }
 
+dealii::ElasticityExample::VectorType dealii::ElasticityExample::transfer_to(int refine_steps, const dealii::ElasticityExample::VectorType &v)
+{
+  triangulation_.prepare_coarsening_and_refinement();
+  SolutionTransfer<dim,VectorType> trans(dof_handler_);
+  trans.prepare_for_pure_refinement();
+  refine_global(refine_steps);
+
+  VectorType ret(dof_handler_.n_dofs());
+  trans.refine_interpolate(v, ret);
+  return ret;
+}
+
 dealii::ElasticityEoc::ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param)
-  : dealii::ElasticityExample(min_refine)
-  ,  max_refine_(max_refine)
+  : max_refine_(max_refine)
   , param_(param)
 {
 }
 
 std::vector<std::pair<dealii::ElasticityExample::Number, dealii::ElasticityExample::Number> > dealii::ElasticityEoc::run()
 {
-  auto last_sol = solve(param_);
   std::vector<Number> norms;
   std::vector<Number> relative_norms;
 
-  for (int i = 0; i < max_refine_; ++i)
-  {
-    triangulation_.prepare_coarsening_and_refinement();
-    SolutionTransfer<dim,VectorType> trans(dof_handler_);
-    trans.prepare_for_coarsening_and_refinement(last_sol);
-    refine_global(1);
+  const auto reference_refine = max_refine_ + 3;
+  ElasticityExample reference(reference_refine);
+  const auto norm = std::bind(std::mem_fn(&ElasticityExample::h1_0_semi_norm), &reference, std::placeholders::_1);
+//  const auto norm = [](const VectorType& l){return l.l2_norm();};
+  const auto reference_solution = reference.solve(param_);
+  const auto reference_norm = norm(reference_solution);
 
-    VectorType last_sol_refined(dof_handler_.n_dofs());
-    trans.interpolate(last_sol, last_sol_refined);
-    auto current_sol = solve(param_);
-    last_sol_refined -= current_sol;
-    const auto h1 = h1_0_semi_norm(last_sol_refined);
-    norms.push_back(h1);
-    relative_norms.push_back(h1/h1_0_semi_norm(current_sol));
-    last_sol = current_sol;
+  for (int i = 1; i < max_refine_+1; ++i)
+  {
+    ElasticityExample cur_disc(i);
+    const auto current_solution = cur_disc.solve(param_);
+    auto current_solution_refined = cur_disc.transfer_to(reference_refine - i, current_solution);
+    current_solution_refined -= reference_solution;
+    const auto norm_value = norm(current_solution_refined);
+    norms.push_back(norm_value);
+    relative_norms.push_back(norm_value/reference_norm);
   }
 
   std::vector<std::pair<Number,Number>> eoc;
   for (int i = 1; i < max_refine_; ++i)
   {
-    eoc.emplace_back(std::log(norms[i]/norms[i-1])/std::log(2), std::log(relative_norms[i]/relative_norms[i-1])/std::log(2));
+    eoc.emplace_back(std::log(norms[i]/norms[i-1])/std::log(1/2.),
+        std::log(relative_norms[i]/relative_norms[i-1])/std::log(1/2.));
   }
 
   return eoc;

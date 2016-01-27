@@ -14,10 +14,10 @@ except ImportError:
 import numpy as np
 
 from pymor.vectorarrays.interfaces import VectorSpace
-from pymor.vectorarrays.list import VectorInterface, ListVectorArray
+from pymor.vectorarrays.list import ListVectorArray, CopyOnWriteVector
 
 
-class DealIIVector(VectorInterface):
+class DealIIVector(CopyOnWriteVector):
     """Wraps a DealII vector to make it usable with ListVectorArray."""
 
     def __init__(self, impl):
@@ -27,7 +27,7 @@ class DealIIVector(VectorInterface):
     def from_instance(cls, instance):
         return cls(instance.impl)
 
-    def copy(self, deep=False):
+    def _copy_data(self):
         return type(self)(pd2.Vector(self.impl))
 
     @classmethod
@@ -48,12 +48,12 @@ class DealIIVector(VectorInterface):
     def subtype(self):
         return self.impl.size()
 
-    def scal(self, alpha):
+    def _scal(self, alpha):
         if self.dim == 0:
             return
         self.impl *= alpha
 
-    def axpy(self, alpha, x):
+    def _axpy(self, alpha, x):
         if x.dim == 0:
             return
         if x is self:
@@ -89,7 +89,7 @@ class DealIIVector(VectorInterface):
         return DealIIVector(self.impl + other.impl)
 
     def __iadd__(self, other):
-        # self._copy_data_if_needed()
+        self._copy_data_if_needed()
         self.impl += other.impl
         return self
 
@@ -99,7 +99,7 @@ class DealIIVector(VectorInterface):
         return DealIIVector(self.impl - other.impl)
 
     def __isub__(self, other):
-        # self._copy_data_if_needed()
+        self._copy_data_if_needed()
         self.impl -= other.impl
         return self
 

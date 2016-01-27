@@ -1,4 +1,4 @@
-#include "discretization.hh"
+#include "example.hh"
 
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/solver_bicgstab.h>

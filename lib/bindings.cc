@@ -6,7 +6,7 @@
 #include <deal.II/lac/solver_bicgstab.h>
 #include <deal.II/base/logstream.h>
 
-#include "discretization.hh"
+#include "example.hh"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>

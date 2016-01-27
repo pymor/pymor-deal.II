@@ -1,5 +1,5 @@
-#ifndef DISCRETIZATION_HH
-#define DISCRETIZATION_HH
+#ifndef EXAMPLE_HH
+#define EXAMPLE_HH
 
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
@@ -102,6 +102,6 @@ private:
   const dealii::ElasticityExample::Parameter param_;
 };
 
-#endif // DISCRETIZATION_HH
+#endif // EXAMPLE_HH
 
 } // namespace dealii

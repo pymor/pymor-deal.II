@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from pydealii_bindings import ElasticityEoc,ElasticityExample
 from plotting import elasticity_error_curves
 
+logging.basicConfig()
 
 def elasticity_eoc():
     for lmbda in ( 1., 10., 75., ):
@@ -31,7 +32,7 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
                 if not errors.has_key(coarse_level):
                     errors[coarse_level] = []
                 errors[coarse_level].append(np.nan)
-                continue
+            continue
         for coarse_level in levels:
             if not errors.has_key(coarse_level):
                 errors[coarse_level] = []

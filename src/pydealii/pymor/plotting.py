@@ -17,4 +17,4 @@ def elasticity_error_curves(errors, lambdas):
 
 
 if __name__ == '__main__':
-    elasticity_error_curves(loads(open(sys.argv[1]).read()))
+    elasticity_error_curves(*loads(open(sys.argv[1]).read()))

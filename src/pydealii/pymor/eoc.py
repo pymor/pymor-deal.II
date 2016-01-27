@@ -15,13 +15,12 @@ def elasticity_eoc():
         print('absolute eoc for param {}: {}'.format(param, [a[0] for a in eoc]))
 
 
-def elasticity_calculate_errors(ref_level=9):
+def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
     ref_disc = ElasticityExample(ref_level)
 
     log = logging.getLogger()
     errors = {}
-    lambdas = np.linspace(1., 80., 10)
-    levels = (1, 3, 5, 7)
+    lambdas = np.linspace(1., 80., steps)
     for lmbda in lambdas:
         param = {"lambda": [lmbda], "mu": [1.]}
         try:
@@ -55,5 +54,5 @@ def elasticity_calculate_errors(ref_level=9):
     elasticity_error_curves(errors, lambdas)
 
 if __name__ == '__main__':
-    elasticity_calculate_errors()
+    elasticity_calculate_errors(levels=range(2,8), steps=20)
     # elasticity_eoc()

@@ -10,20 +10,21 @@ from numbers import Number
 
 from pymor.operators.basic import OperatorBase
 from pymor.operators.constructions import ZeroOperator
+
 from pydealii.pymor.vectorarray import DealIIVectorSpace
 import pydealii_bindings as pd2
 
 
 class DealIIMatrixOperator(OperatorBase):
-    """Wraps a FEniCS matrix as an |Operator|."""
+    """Wraps a dealII matrix as an |Operator|."""
 
     linear = True
 
     def __init__(self, matrix, name=None):
         self.source = DealIIVectorSpace(matrix.m())
         self.range = DealIIVectorSpace(matrix.n())
-        self.name = name
         self.matrix = matrix
+        self.name = name
 
     def apply(self, U, ind=None, mu=None):
         assert U in self.source
@@ -64,7 +65,7 @@ class DealIIMatrixOperator(OperatorBase):
     def assemble_lincomb(self, operators, coefficients, solver_options=None, name=None):
         if not all(isinstance(op, (DealIIMatrixOperator, ZeroOperator)) for op in operators):
             return None
-        assert not solver_options
+        assert not solver_options  # linear solver is not yet configurable
 
         matrix = pd2.SparseMatrix(operators[0].matrix.get_sparsity_pattern())
         matrix.copy_from(operators[0].matrix)
@@ -72,6 +73,5 @@ class DealIIMatrixOperator(OperatorBase):
         for op, c in izip(operators[1:], coefficients[1:]):
             if isinstance(op, ZeroOperator):
                 continue
-            matrix.add(c, op.matrix)  # in general, we cannot assume the same nonzero pattern for
-                                      # all matrices. how to improve this?
+            matrix.add(c, op.matrix)
         return DealIIMatrixOperator(matrix, name=name)

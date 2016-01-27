@@ -11,114 +11,104 @@ try:
 except ImportError:
     HAVE_DEALII = False
 
-if HAVE_DEALII:
-    import numpy as np
+import numpy as np
 
-    from pymor.core.defaults import defaults
-    from pymor.vectorarrays.interfaces import VectorSpace
-    from pymor.vectorarrays.list import VectorInterface, ListVectorArray
+from pymor.vectorarrays.interfaces import VectorSpace
+from pymor.vectorarrays.list import VectorInterface, ListVectorArray
 
 
-    class DealIIVectorSubtype(tuple):
+class DealIIVector(VectorInterface):
+    """Wraps a DealII vector to make it usable with ListVectorArray."""
 
-        def __eq__(self, other):
-            return (type(other) is DealIIVectorSubtype and
-                    self[0] == other[0])
+    def __init__(self, impl):
+        self.impl = impl
 
+    @classmethod
+    def from_instance(cls, instance):
+        return cls(instance.impl)
 
-    class DealIIVector(VectorInterface):
-        """Wraps a DealII vector to make it usable with ListVectorArray."""
+    def copy(self, deep=False):
+        return type(self)(pd2.Vector(self.impl))
 
-        def __init__(self, impl):
-            self.impl = impl
+    @classmethod
+    def make_zeros(cls, subtype):
+        dim = subtype
+        impl = pd2.Vector(dim)
+        return cls(impl)
 
-        @classmethod
-        def from_instance(cls, instance):
-            return cls(instance.impl)
+    @property
+    def data(self):
+        return np.array(self.impl, copy=False, dtype=np.double)
 
-        def copy(self, deep=False):
-            return type(self)(pd2.Vector(self.impl))
+    @property
+    def dim(self):
+        return self.impl.size()
 
-        @classmethod
-        def make_zeros(cls, subtype):
-            dim = subtype[0]
-            impl = pd2.Vector(dim)
-            return cls(impl)
+    @property
+    def subtype(self):
+        return self.impl.size()
 
-        @property
-        def data(self):
-            return np.array(self.impl, copy=False, dtype=np.double)
+    def scal(self, alpha):
+        if self.dim == 0:
+            return
+        self.impl *= alpha
 
-        @property
-        def dim(self):
-            return self.impl.size()
+    def axpy(self, alpha, x):
+        if x.dim == 0:
+            return
+        if x is self:
+            self.impl *= 1. + alpha
+        else:
+            self.impl.axpy(alpha, x.impl)
 
-        @property
-        def subtype(self):
-            impl = self.impl
-            return DealIIVectorSubtype((self.impl.size(),))
+    def dot(self, other):
+        return 0 if self.dim == 0 else self.impl * other.impl
 
-        def scal(self, alpha):
-            if self.dim == 0:
-                return
-            self.impl *= alpha
+    def l1_norm(self):
+        # dealII throws an exception on 0 length norms
+        return 0 if self.dim == 0 else self.impl.l1_norm()
 
-        def axpy(self, alpha, x):
-            if x.dim == 0:
-                return
-            if x is self:
-                self.impl *= 1. + alpha
-            else:
-                self.impl.axpy(alpha, x.impl)
+    def l2_norm(self):
+        return 0 if self.dim == 0 else self.impl.l2_norm()
 
-        def dot(self, other):
-            return 0 if self.dim == 0 else self.impl * other.impl
+    def sup_norm(self):
+        return 0 if self.dim == 0 else self.impl.linfty_norm()
 
-        def l1_norm(self):
-            # dealII throws an exception on 0 length norms
-            return 0 if self.dim == 0 else self.impl.l1_norm()
+    def components(self, component_indices):
+        if len(component_indices) == 0:
+            return np.array([], dtype=np.intc)
+        assert 0 <= np.min(component_indices)
+        assert np.max(component_indices) < self.dim
+        return np.array([self.impl[i] for i in component_indices])
 
-        def l2_norm(self):
-            return 0 if self.dim == 0 else self.impl.l2_norm()
+    def amax(self):
+        max_ind = np.argmax(self.impl)
+        return max_ind, self.impl[max_ind]
 
-        def sup_norm(self):
-            return 0 if self.dim == 0 else self.impl.linfty_norm()
+    def __add__(self, other):
+        return DealIIVector(self.impl + other.impl)
 
-        def components(self, component_indices):
-            if len(component_indices) == 0:
-                return np.array([], dtype=np.intc)
-            assert 0 <= np.min(component_indices)
-            assert np.max(component_indices) < self.dim
-            return np.array([self.impl[i] for i in component_indices])
+    def __iadd__(self, other):
+        # self._copy_data_if_needed()
+        self.impl += other.impl
+        return self
 
-        def amax(self):
-            max_ind = np.argmax(self.impl)
-            return max_ind, self.impl[max_ind]
+    __radd__ = __add__
 
-        def __add__(self, other):
-            return DealIIVector(self.impl + other.impl)
+    def __sub__(self, other):
+        return DealIIVector(self.impl - other.impl)
 
-        def __iadd__(self, other):
-            # self._copy_data_if_needed()
-            self.impl += other.impl
-            return self
+    def __isub__(self, other):
+        # self._copy_data_if_needed()
+        self.impl -= other.impl
+        return self
 
-        __radd__ = __add__
+    def __mul__(self, other):
+        return DealIIVector(self.impl * other)
 
-        def __sub__(self, other):
-            return DealIIVector(self.impl - other.impl)
-
-        def __isub__(self, other):
-            # self._copy_data_if_needed()
-            self.impl -= other.impl
-            return self
-
-        def __mul__(self, other):
-            return DealIIVector(self.impl * other)
-
-        def __neg__(self):
-            return DealIIVector(-self.impl)
+    def __neg__(self):
+        return DealIIVector(-self.impl)
 
 
-    def DealIIVectorSpace(dim):
-        return VectorSpace(ListVectorArray, (DealIIVector, DealIIVectorSubtype((dim,))))
+def DealIIVectorSpace(dim):
+    return VectorSpace(ListVectorArray, (DealIIVector, dim))

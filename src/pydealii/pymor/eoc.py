@@ -1,36 +1,59 @@
-import itertools
+import logging
+from cPickle import dump, dumps
 import numpy as np
 import matplotlib.pyplot as plt
 
 from pydealii_bindings import ElasticityEoc,ElasticityExample
+from plotting import elasticity_error_curves
 
-LOW, HIGH = 18e-3, 3e-0
-from pprint import pprint
 
-for lmbda in ( 1., 10., 75., ):
-    param = {"lambda": [lmbda], "mu": [1.]}
-    # cpp_disc = ElasticityEoc(2, 6, param)
-    # eoc = cpp_disc.run()
-    # print('absolute eoc for param {}: {}'.format(param, [a[0] for a in eoc]))
+def elasticity_eoc():
+    for lmbda in ( 1., 10., 75., ):
+        param = {"lambda": [lmbda], "mu": [1.]}
+        cpp_disc = ElasticityEoc(2, 6, param)
+        eoc = cpp_disc.run()
+        print('absolute eoc for param {}: {}'.format(param, [a[0] for a in eoc]))
 
-ref_level = 9
-coarse_level = 5
-ref_disc = ElasticityExample(ref_level)
 
-errors = []
-points = np.linspace(10., 30., 7)
-for lmbda in points:
-    param = {"lambda": [lmbda], "mu": [1.]}
-    ref_sol = ref_disc.solve(param)
-    coarse_disc = ElasticityExample(coarse_level)
-    coarse_sol = coarse_disc.solve(param)
-    coarse_disc.visualize([coarse_sol], ["coarse_lambda_{}.vtk".format(lmbda)])
-    prolonged = coarse_disc.transfer_to(ref_level - coarse_level, coarse_sol)
-    prolonged -= ref_sol
-    errors.append(coarse_disc.h1_0_semi_norm(prolonged)/coarse_disc.h1_0_semi_norm(ref_sol))
+def elasticity_calculate_errors(ref_level=9):
+    ref_disc = ElasticityExample(ref_level)
 
-plt.plot(points, errors)
-plt.title('coarse_lvl: {} reference_lvl: {}'.format(coarse_level, ref_level))
-plt.xlabel('Lambda')
-plt.ylabel('|||u_H-u_h|||')
-plt.show()
+    log = logging.getLogger()
+    errors = {}
+    lambdas = np.linspace(1., 80., 10)
+    levels = (1, 3, 5, 7)
+    for lmbda in lambdas:
+        param = {"lambda": [lmbda], "mu": [1.]}
+        try:
+            ref_sol = ref_disc.solve(param)
+        except RuntimeError as e:
+            log.error('fine solve failed lvl {} -- lambda {}'.format(ref_level, lmbda))
+            for coarse_level in levels:
+                if not errors.has_key(coarse_level):
+                    errors[coarse_level] = []
+                errors[coarse_level].append(np.nan)
+                continue
+        for coarse_level in levels:
+            if not errors.has_key(coarse_level):
+                errors[coarse_level] = []
+            coarse_disc = ElasticityExample(coarse_level)
+            try:
+                coarse_sol = coarse_disc.solve(param)
+            except RuntimeError as e:
+                log.error('coarse solve failed lvl {} -- lambda {}'.format(coarse_level, lmbda))
+                errors[coarse_level].append(np.nan)
+                continue
+            coarse_disc.visualize([coarse_sol], ['coarse_lvl_{}_lambda_{}.vtk'.format(coarse_level, lmbda)])
+            prolonged = coarse_disc.transfer_to(ref_level - coarse_level, coarse_sol)
+            prolonged -= ref_sol
+            errors[coarse_level].append(coarse_disc.h1_0_semi_norm(prolonged)/coarse_disc.h1_0_semi_norm(ref_sol))
+    for coarse_level in levels:
+        plt.plot(lambdas, errors[coarse_level])
+
+    open('elas__{}__ref-{}.dump'.format(levels, ref_level), 'wb').write(dumps((errors, lambdas)))
+
+    elasticity_error_curves(errors, lambdas)
+
+if __name__ == '__main__':
+    elasticity_calculate_errors()
+    # elasticity_eoc()

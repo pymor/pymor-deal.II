@@ -142,7 +142,7 @@ public:
                  throw std::runtime_error(ss.str());
                }
                for (int i = 0; i < slicelength; ++i) {
-                 s[start] = *static_cast<double*>(info.ptr + i * sizeof(Number));
+                 s[start] = *(static_cast<double*>(info.ptr)+ i * sizeof(Number));
                  start += step;
                }
              })

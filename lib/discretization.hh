@@ -93,7 +93,7 @@ public:
 
   typedef ElasticityExample::Number Number;
   typedef ElasticityExample::VectorType VectorType;
-  std::vector<std::pair<Number,Number>> run();
+  std::vector<std::pair<Number, Number>> run();
 
   static pybind11::class_<ElasticityEoc> make_py_class(pybind11::module& module);
 

@@ -51,7 +51,7 @@ public:
   typedef std::map<std::string, std::vector<Number>> Parameter;
   typedef Vector<Number> VectorType;
 
-  void visualize(const std::vector<VectorType>& solutions, std::vector<std::string> filenames) const;
+  void visualize(const VectorType& solution, std::string filename) const;
   VectorType solve(const Parameter& param);
 
   static pybind11::class_<ElasticityExample> make_py_class(pybind11::module& module);
@@ -71,7 +71,6 @@ private:
   void assemble_h1();
   void assemble_system();
   void _solve(Parameter param, VectorType& solution);
-  void _visualize(const VectorType& solution, std::string filename) const;
 
 protected:
   void refine_global(int refine_steps = 1);

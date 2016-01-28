@@ -43,15 +43,6 @@ dealii::ElasticityExample::ElasticityExample(int refine_steps)
 
 dealii::ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
 
-void dealii::ElasticityExample::visualize(const std::vector<dealii::ElasticityExample::VectorType>& solutions, 
-										  std::vector<std::string> filenames) const
-{
-  assert(solutions.size()==filenames.size());
-  for(size_t i = 0; i < solutions.size(); ++i) {
-    _visualize(solutions[i], filenames[i]);
-  }
-}
-
 void dealii::ElasticityExample::setup_system() {
   dof_handler_.clear();
   dof_handler_.distribute_dofs(fe_);
@@ -283,7 +274,7 @@ void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   cg.solve(sum, solution, system_rhs_, preconditioner);
 }
 
-void dealii::ElasticityExample::_visualize(const VectorType& solution, std::string filename) const {
+void dealii::ElasticityExample::visualize(const VectorType& solution, std::string filename) const {
   std::ofstream output(filename);
 
   DataOut<dim> data_out;
@@ -363,8 +354,7 @@ py::class_<dealii::ElasticityExample> dealii::ElasticityExample::make_py_class(p
       .def("h1_mat", &dealii::ElasticityExample::h1_mat, py::return_value_policy::reference_internal)
       .def("mu_mat", &dealii::ElasticityExample::mu_mat, py::return_value_policy::reference_internal)
       .def("lambda_mat", &dealii::ElasticityExample::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &dealii::ElasticityExample::visualize, py::arg("solution"), py::arg("filename"),
-           py::return_value_policy::reference_internal)
+      .def("visualize", &dealii::ElasticityExample::visualize, py::arg("solution"), py::arg("filename"))
       .def("h1_0_semi_norm", &dealii::ElasticityExample::h1_0_semi_norm)
       .def("energy_norm", &dealii::ElasticityExample::energy_norm)
       .def("transfer_to", &dealii::ElasticityExample::transfer_to)

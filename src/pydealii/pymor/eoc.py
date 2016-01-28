@@ -7,6 +7,7 @@ from pydealii_bindings import ElasticityEoc,ElasticityExample
 from plotting import elasticity_error_curves
 
 logging.basicConfig()
+MARKERS = ['s', 'x', 'o', 'D', '+', '|', '*', '1', '2', '3', '4', '6', '7']
 
 def elasticity_eoc():
     for lmbda in ( 1., 10., 75., ):
@@ -47,13 +48,13 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
             prolonged = coarse_disc.transfer_to(ref_level - coarse_level, coarse_sol)
             prolonged -= ref_sol
             errors[coarse_level].append(coarse_disc.h1_0_semi_norm(prolonged)/coarse_disc.h1_0_semi_norm(ref_sol))
-    for coarse_level in levels:
-        plt.plot(lambdas, errors[coarse_level])
+    for coarse_level in errors.keys():
+        plt.plot(lambdas, errors[coarse_level], MARKERS[coarse_level])
 
     open('elas__{}__ref-{}.dump'.format(levels, ref_level), 'wb').write(dumps((errors, lambdas)))
 
     elasticity_error_curves(errors, lambdas)
 
 if __name__ == '__main__':
-    elasticity_calculate_errors(levels=range(2,8), steps=20)
+    elasticity_calculate_errors(levels=range(2, 8), steps=20, ref_level=9)
     # elasticity_eoc()

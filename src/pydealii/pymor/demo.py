@@ -36,7 +36,7 @@ parameter_type = Parameter(param).parameter_type
 # cpp_disc.visualize(u, "highdim_solution_cpp.vtk")
 
 lambda_fn, mu_fn = [GenericParameterFunctional(lambda mu: mu[n], Parameter({n: [1.]}).parameter_type) for n in ['lambda', 'mu']]
-LOW, HIGH = 18e-3, 3e-0
+LOW, HIGH = 1, 10
 ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat', 'mu_mat']]
 op = LincombOperator(ops, (lambda_fn, mu_fn))
 rhs = VectorFunctional(ListVectorArray([DealIIVector(cpp_disc.rhs())]))

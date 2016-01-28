@@ -22,7 +22,8 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
 
     log = logging.getLogger()
     errors = {}
-    lambdas = np.linspace(1., 80., steps)
+    min_lambda, max_lambda = 1., 10.
+    lambdas = np.linspace(min_lambda, max_lambda, steps)
     for lmbda in lambdas:
         param = {"lambda": [lmbda], "mu": [1.]}
         try:
@@ -51,7 +52,7 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
     for coarse_level in errors.keys():
         plt.plot(lambdas, errors[coarse_level], MARKERS[coarse_level])
 
-    open('elas__{}__ref-{}.dump'.format(levels, ref_level), 'wb').write(dumps((errors, lambdas)))
+    open('elas__{}__ref-{}_lambda-min_{}-max_{}_-_steps_{}.dump'.format(levels, ref_level, min_lambda, max_lambda, steps), 'wb').write(dumps((errors, lambdas)))
 
     elasticity_error_curves(errors, lambdas)
 

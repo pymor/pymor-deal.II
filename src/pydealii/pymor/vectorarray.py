@@ -28,7 +28,7 @@ class DealIIVector(CopyOnWriteVector):
         return cls(instance.impl)
 
     def _copy_data(self):
-        return type(self)(pd2.Vector(self.impl))
+        self.impl = pd2.Vector(self.impl)
 
     @classmethod
     def make_zeros(cls, subtype):

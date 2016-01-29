@@ -88,7 +88,7 @@ void bind_vector(pybind11::module& module) {
                  throw std::runtime_error(ss.str());
                }
                for (int i = 0; i < slicelength; ++i) {
-                 s[start] = *(static_cast<double*>(info.ptr)+ i * sizeof(Number));
+                 s[start] = *(static_cast<Number*>(info.ptr) + i);
                  start += step;
                }
              })

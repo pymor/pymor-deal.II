@@ -224,14 +224,12 @@ PYBIND11_PLUGIN(pydealii_bindings) {
   typedef dealii::PyVector<Number> PyNumberVector;
   typedef dealii::PySparseMatrix<double> PyDoubleMatrix;
 
-  py::module m("pydealii_bindings", "pybind11 elliptic plugin");
+  py::module m("pydealii_bindings", "Python bindings for deal.II");
   py::class_<dealii::SparsityPattern> sp(m, "SparsityPattern");
   auto vec = PyNumberVector::make_py_class(m);
   // moving this to fac methods does not compile
   vec.alias<dealii::Vector<Number>>();
   auto mat = PyDoubleMatrix::make_py_class(m);
-  auto disc = dealii::ElasticityExample::make_py_class(m);
-  auto eoc = dealii::ElasticityEoc::make_py_class(m);
 
   return m.ptr();
 }

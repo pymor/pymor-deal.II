@@ -32,11 +32,18 @@ include_directories(${PYTHON_INCLUDE_DIR})
 include_directories(./pybind11/include/)
 
 # Create the binding library
-add_library(pydealii_bindings SHARED bindings.cc example.cc)
+add_library(pydealii_bindings SHARED bindings.cc)
 # Don't add a 'lib' prefix to the shared library
 set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
 DEAL_II_SETUP_TARGET(pydealii_bindings)
 target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})
+
+# Create the example library
+add_library(dealii_example SHARED example.cc)
+set_target_properties(dealii_example PROPERTIES PREFIX "")
+DEAL_II_SETUP_TARGET(dealii_example)
+target_link_libraries(dealii_example ${PYTHON_LIBRARY})
+# target_link_libraries(dealii_example dealii_bindings)
 
 add_executable(elastic_eoc elastic_eoc.cc example.cc)
 DEAL_II_SETUP_TARGET(elastic_eoc)

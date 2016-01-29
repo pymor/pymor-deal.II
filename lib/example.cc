@@ -443,3 +443,11 @@ pybind11::class_<dealii::ElasticityEoc> dealii::ElasticityEoc::make_py_class(pyb
       .def("run", &dealii::ElasticityEoc::run);
   return eoc;
 }
+
+
+PYBIND11_PLUGIN(dealii_example) {
+  py::module m("dealii_example", "deal.II elasticity example");
+  auto disc = dealii::ElasticityExample::make_py_class(m);
+  auto eoc = dealii::ElasticityEoc::make_py_class(m);
+  return m.ptr();
+}

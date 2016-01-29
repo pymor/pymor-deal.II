@@ -345,23 +345,6 @@ dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& par
   return VectorType(tmp_data_);
 }
 
-namespace py = pybind11;
-
-py::class_<dealii::ElasticityExample> dealii::ElasticityExample::make_py_class(py::module& module) {
-  py::class_<dealii::ElasticityExample> disc(module, "ElasticityExample");
-  disc.def(py::init<int>(), py::arg("refine_steps") = 4u)
-      .def("solve", &dealii::ElasticityExample::solve)
-      .def("h1_mat", &dealii::ElasticityExample::h1_mat, py::return_value_policy::reference_internal)
-      .def("mu_mat", &dealii::ElasticityExample::mu_mat, py::return_value_policy::reference_internal)
-      .def("lambda_mat", &dealii::ElasticityExample::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &dealii::ElasticityExample::visualize, py::arg("solution"), py::arg("filename"))
-      .def("h1_0_semi_norm", &dealii::ElasticityExample::h1_0_semi_norm)
-      .def("energy_norm", &dealii::ElasticityExample::energy_norm)
-      .def("transfer_to", &dealii::ElasticityExample::transfer_to)
-      .def("rhs", &dealii::ElasticityExample::rhs, py::return_value_policy::reference_internal);
-  return disc;
-}
-
 const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::lambda_mat() const {
   return lambda_system_matrix_;
 }
@@ -388,7 +371,7 @@ dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::N
 dealii::ElasticityExample::VectorType dealii::ElasticityExample::transfer_to(int refine_steps, const dealii::ElasticityExample::VectorType &v)
 {
   triangulation_.prepare_coarsening_and_refinement();
-  SolutionTransfer<dim,VectorType> trans(dof_handler_);
+  dealii::SolutionTransfer<dim,VectorType> trans(dof_handler_);
   trans.prepare_for_pure_refinement();
   refine_global(refine_steps);
 
@@ -397,57 +380,27 @@ dealii::ElasticityExample::VectorType dealii::ElasticityExample::transfer_to(int
   return ret;
 }
 
-dealii::ElasticityEoc::ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param)
-  : max_refine_(max_refine)
-  , param_(param)
-{
-}
 
-std::vector<std::pair<dealii::ElasticityExample::Number, dealii::ElasticityExample::Number> > dealii::ElasticityEoc::run()
-{
-  std::vector<Number> norms;
-  std::vector<Number> relative_norms;
+// -------- PYTHON BINDINGS -----------------------------------------------------------------------
 
-  const auto reference_refine = max_refine_ + 3;
-  ElasticityExample reference(reference_refine);
-  const auto norm = std::bind(std::mem_fn(&ElasticityExample::h1_0_semi_norm), &reference, std::placeholders::_1);
-//  const auto norm = [](const VectorType& l){return l.l2_norm();};
-  const auto reference_solution = reference.solve(param_);
-  const auto reference_norm = norm(reference_solution);
-
-  for (int i = 1; i < max_refine_+1; ++i)
-  {
-    ElasticityExample cur_disc(i);
-    const auto current_solution = cur_disc.solve(param_);
-    auto current_solution_refined = cur_disc.transfer_to(reference_refine - i, current_solution);
-    current_solution_refined -= reference_solution;
-    const auto norm_value = norm(current_solution_refined);
-    norms.push_back(norm_value);
-    relative_norms.push_back(norm_value/reference_norm);
-  }
-
-  std::vector<std::pair<Number,Number>> eoc;
-  for (int i = 1; i < max_refine_; ++i)
-  {
-    eoc.emplace_back(std::log(norms[i]/norms[i-1])/std::log(1/2.),
-        std::log(relative_norms[i]/relative_norms[i-1])/std::log(1/2.));
-  }
-
-  return eoc;
-}
-
-pybind11::class_<dealii::ElasticityEoc> dealii::ElasticityEoc::make_py_class(pybind11::module &module)
-{
-  py::class_<dealii::ElasticityEoc> eoc(module, "ElasticityEoc");
-  eoc.def(py::init<int, int, dealii::ElasticityExample::Parameter>())
-      .def("run", &dealii::ElasticityEoc::run);
-  return eoc;
-}
-
+namespace py = pybind11;
 
 PYBIND11_PLUGIN(dealii_example) {
+
   py::module m("dealii_example", "deal.II elasticity example");
-  auto disc = dealii::ElasticityExample::make_py_class(m);
-  auto eoc = dealii::ElasticityEoc::make_py_class(m);
+
+  typedef dealii::ElasticityExample Example;
+  py::class_<dealii::ElasticityExample>(m, "ElasticityExample")
+      .def(py::init<int>(), py::arg("refine_steps") = 4u)
+      .def("solve", &Example::solve)
+      .def("h1_mat", &Example::h1_mat, py::return_value_policy::reference_internal)
+      .def("mu_mat", &Example::mu_mat, py::return_value_policy::reference_internal)
+      .def("lambda_mat", &Example::lambda_mat, py::return_value_policy::reference_internal)
+      .def("visualize", &Example::visualize, py::arg("solution"), py::arg("filename"))
+      .def("h1_0_semi_norm", &Example::h1_0_semi_norm)
+      .def("energy_norm", &Example::energy_norm)
+      .def("transfer_to", &Example::transfer_to)
+      .def("rhs", &Example::rhs, py::return_value_policy::reference_internal);
+
   return m.ptr();
 }

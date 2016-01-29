@@ -54,8 +54,6 @@ public:
   void visualize(const VectorType& solution, std::string filename) const;
   VectorType solve(const Parameter& param);
 
-  static pybind11::class_<ElasticityExample> make_py_class(pybind11::module& module);
-
   const SparseMatrix<Number>& lambda_mat() const;
   const SparseMatrix<Number>& mu_mat() const;
   const SparseMatrix<Number>& h1_mat() const;
@@ -83,22 +81,6 @@ protected:
   SparsityPattern sparsity_pattern_;
   SparseMatrix<Number> lambda_system_matrix_, mu_system_matrix_, h1_matrix_;
   Vector<Number> system_rhs_, tmp_data_;
-};
-
-class ElasticityEoc {
-public:
-  //! max refine should be > 2
-  ElasticityEoc(int min_refine, int max_refine, dealii::ElasticityExample::Parameter param);
-
-  typedef ElasticityExample::Number Number;
-  typedef ElasticityExample::VectorType VectorType;
-  std::vector<std::pair<Number, Number>> run();
-
-  static pybind11::class_<ElasticityEoc> make_py_class(pybind11::module& module);
-
-private:
-  const int max_refine_;
-  const dealii::ElasticityExample::Parameter param_;
 };
 
 #endif // EXAMPLE_HH

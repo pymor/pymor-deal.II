@@ -118,7 +118,7 @@ void bind_sparse_matrix(pybind11::module& module) {
   typedef dealii::Vector<Number> Vector;
 
   auto cg_solve = [](Matrix& self, Vector& solution, const Vector& rhs) {
-    dealii::SolverControl solver_control(2000, 1e-12);
+    dealii::SolverControl solver_control(20000, 1e-12);
     dealii::SolverCG<> solver(solver_control);
     dealii::PreconditionSSOR<> preconditioner;
     preconditioner.initialize(self, 1.2);

@@ -261,7 +261,7 @@ void ElasticityExample::assemble_system() {
 }
 
 void ElasticityExample::_solve(Parameter param, VectorType& solution) {
-  SolverControl solver_control(2000, 1e-12);
+  SolverControl solver_control(20000, 1e-12);
   SolverCG<> cg(solver_control);
 
   deallog << "Solving for " << dof_handler_.n_dofs() << " unknowns" << std::endl;

@@ -1,16 +1,13 @@
 import pytest
 import numpy as np
-import dealii_bindings as dealii
+import pydealii_bindings as dealii
 
 def test_vector():
-    v = dealii.Vector()
+    v = dealii.Vector(10)
     u = dealii.Vector(10)
     ones = dealii.Vector(10)
     for i in range(len(ones)):
         ones[i] = 1
-    v.reinit(10, False)
-    v.reinit(1)
-    v.reinit(10, True)
     w = dealii.Vector(u)
     assert u.size() == w.size() == v.size()
     v[1] = 3

@@ -135,7 +135,7 @@ public:
                py::buffer_info info = value.request();
                if (!slice.compute(s.size(), &start, &stop, &step, &slicelength))
                  throw py::error_already_set();
-               if (slicelength != info.count) {
+               if (slicelength != info.size) {
                  std::stringstream ss;
                  ss << "Left and right hand size of slice assignment have different sizes!";
                  ss << slicelength << " vs. " << info.ndim;

@@ -29,9 +29,7 @@ find_package(PythonLibs ${REQUIRED_PYTHON_VERSION} REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories(${PYTHON_INCLUDE_DIR})
-# pybind11 path
-set(PYBIND11_INLUCDE_DIR /home/r_milk01/fast_projekte/uni/paper/15_pymor_paper/local/include CACHE STRING "")
-include_directories(${PYBIND11_INLUCDE_DIR})
+include_directories(./pybind11/include/)
 
 # Create the binding library
 add_library(pydealii_bindings SHARED bindings.cc example.cc)

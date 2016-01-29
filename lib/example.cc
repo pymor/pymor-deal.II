@@ -34,16 +34,16 @@ private:
   dealii::SparseMatrix<Number> sum_;
 };
 
-dealii::ElasticityExample::ElasticityExample(int refine_steps)
+ElasticityExample::ElasticityExample(int refine_steps)
   : dof_handler_(triangulation_)
   , fe_(FE_Q<dim>(1), dim) {
   GridGenerator::hyper_cube(triangulation_, -1, 1);
   refine_global(refine_steps);
 }
 
-dealii::ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
+ElasticityExample::~ElasticityExample() { dof_handler_.clear(); }
 
-void dealii::ElasticityExample::setup_system() {
+void ElasticityExample::setup_system() {
   dof_handler_.clear();
   dof_handler_.distribute_dofs(fe_);
   sparsity_pattern_.reinit(dof_handler_.n_dofs(), dof_handler_.n_dofs(), dof_handler_.max_couplings_between_dofs());
@@ -58,7 +58,7 @@ void dealii::ElasticityExample::setup_system() {
   tmp_data_.reinit(dof_handler_.n_dofs());
 }
 
-void dealii::ElasticityExample::assemble_h1() {
+void ElasticityExample::assemble_h1() {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -102,7 +102,7 @@ void dealii::ElasticityExample::assemble_h1() {
   MatrixTools::apply_boundary_values(boundary_values, h1_matrix_, tmp_data_, system_rhs_);
 }
 
-void dealii::ElasticityExample::assemble_system() {
+void ElasticityExample::assemble_system() {
   QGauss<dim> quadrature_formula(2);
 
   FEValues<dim> fe_values(fe_, quadrature_formula,
@@ -260,7 +260,7 @@ void dealii::ElasticityExample::assemble_system() {
   MatrixTools::apply_boundary_values(boundary_values, lambda_system_matrix_, tmp_data_, system_rhs_);
 }
 
-void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
+void ElasticityExample::_solve(Parameter param, VectorType& solution) {
   SolverControl solver_control(2000, 1e-12);
   SolverCG<> cg(solver_control);
 
@@ -274,7 +274,7 @@ void dealii::ElasticityExample::_solve(Parameter param, VectorType& solution) {
   cg.solve(sum, solution, system_rhs_, preconditioner);
 }
 
-void dealii::ElasticityExample::visualize(const VectorType& solution, std::string filename) const {
+void ElasticityExample::visualize(const VectorType& solution, std::string filename) const {
   std::ofstream output(filename);
 
   DataOut<dim> data_out;
@@ -331,7 +331,7 @@ void dealii::ElasticityExample::visualize(const VectorType& solution, std::strin
   data_out.write_vtk(output);
 }
 
-void dealii::ElasticityExample::refine_global(int refine_steps)
+void ElasticityExample::refine_global(int refine_steps)
 {
   triangulation_.refine_global(refine_steps);
   setup_system();
@@ -339,36 +339,36 @@ void dealii::ElasticityExample::refine_global(int refine_steps)
   assemble_system();
 }
 
-dealii::ElasticityExample::VectorType
-dealii::ElasticityExample::solve(const dealii::ElasticityExample::Parameter& param) {
+ElasticityExample::VectorType
+ElasticityExample::solve(const ElasticityExample::Parameter& param) {
   _solve(param, tmp_data_);
   return VectorType(tmp_data_);
 }
 
-const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::lambda_mat() const {
+const dealii::SparseMatrix<ElasticityExample::Number>& ElasticityExample::lambda_mat() const {
   return lambda_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::mu_mat() const {
+const dealii::SparseMatrix<ElasticityExample::Number>& ElasticityExample::mu_mat() const {
   return mu_system_matrix_;
 }
 
-const dealii::SparseMatrix<dealii::ElasticityExample::Number>& dealii::ElasticityExample::h1_mat() const {
+const dealii::SparseMatrix<ElasticityExample::Number>& ElasticityExample::h1_mat() const {
   return h1_matrix_;
 }
 
-const dealii::Vector<dealii::ElasticityExample::Number>& dealii::ElasticityExample::rhs() const { return system_rhs_; }
+const dealii::Vector<ElasticityExample::Number>& ElasticityExample::rhs() const { return system_rhs_; }
 
-dealii::ElasticityExample::Number dealii::ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const {
+ElasticityExample::Number ElasticityExample::h1_0_semi_norm(const Vector<Number>& v) const {
   return std::sqrt(h1_matrix_.matrix_norm_square(v));
 }
 
-dealii::ElasticityExample::Number
-dealii::ElasticityExample::energy_norm(const Vector<dealii::ElasticityExample::Number>& v) const {
+ElasticityExample::Number
+ElasticityExample::energy_norm(const Vector<ElasticityExample::Number>& v) const {
   return std::sqrt(mu_system_matrix_.matrix_norm_square(v));
 }
 
-dealii::ElasticityExample::VectorType dealii::ElasticityExample::transfer_to(int refine_steps, const dealii::ElasticityExample::VectorType &v)
+ElasticityExample::VectorType ElasticityExample::transfer_to(int refine_steps, const ElasticityExample::VectorType &v)
 {
   triangulation_.prepare_coarsening_and_refinement();
   dealii::SolutionTransfer<dim,VectorType> trans(dof_handler_);
@@ -389,18 +389,17 @@ PYBIND11_PLUGIN(dealii_example) {
 
   py::module m("dealii_example", "deal.II elasticity example");
 
-  typedef dealii::ElasticityExample Example;
-  py::class_<dealii::ElasticityExample>(m, "ElasticityExample")
+  py::class_<ElasticityExample>(m, "ElasticityExample")
       .def(py::init<int>(), py::arg("refine_steps") = 4u)
-      .def("solve", &Example::solve)
-      .def("h1_mat", &Example::h1_mat, py::return_value_policy::reference_internal)
-      .def("mu_mat", &Example::mu_mat, py::return_value_policy::reference_internal)
-      .def("lambda_mat", &Example::lambda_mat, py::return_value_policy::reference_internal)
-      .def("visualize", &Example::visualize, py::arg("solution"), py::arg("filename"))
-      .def("h1_0_semi_norm", &Example::h1_0_semi_norm)
-      .def("energy_norm", &Example::energy_norm)
-      .def("transfer_to", &Example::transfer_to)
-      .def("rhs", &Example::rhs, py::return_value_policy::reference_internal);
+      .def("solve", &ElasticityExample::solve)
+      .def("h1_mat", &ElasticityExample::h1_mat, py::return_value_policy::reference_internal)
+      .def("mu_mat", &ElasticityExample::mu_mat, py::return_value_policy::reference_internal)
+      .def("lambda_mat", &ElasticityExample::lambda_mat, py::return_value_policy::reference_internal)
+      .def("visualize", &ElasticityExample::visualize, py::arg("solution"), py::arg("filename"))
+      .def("h1_0_semi_norm", &ElasticityExample::h1_0_semi_norm)
+      .def("energy_norm", &ElasticityExample::energy_norm)
+      .def("transfer_to", &ElasticityExample::transfer_to)
+      .def("rhs", &ElasticityExample::rhs, py::return_value_policy::reference_internal);
 
   return m.ptr();
 }

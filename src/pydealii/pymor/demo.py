@@ -16,7 +16,7 @@ from pymor.reductors.linear import reduce_stationary_affine_linear
 from pymor.discretizations.basic import StationaryDiscretization
 from pymor.tools.timing import Timer
 
-from pydealii_bindings import ElasticityExample
+from dealii_example import ElasticityExample
 from pydealii.pymor.operator import DealIIMatrixOperator
 from pydealii.pymor.vectorarray import DealIIVector
 

@@ -8,8 +8,6 @@ before_script:
     - docker pull ${IMAGE}
     - export ENV_FILE=${HOME}/env
     - printenv | \grep TRAVIS > ${ENV_FILE}
-    - printenv | \grep encrypt >> ${ENV_FILE}
-    - printenv | \grep TEST >> ${ENV_FILE}
     - export DOCKER_RUN="docker run --env-file ${ENV_FILE} -v ${TRAVIS_BUILD_DIR}:/home/dealii/src ${IMAGE}"
 
 script:
@@ -22,6 +20,6 @@ notifications:
     on_start: never
 matrix:
   include:
-    - env: DEAL=8.2.0
+    #- env: DEAL=8.2.0#currently no docker image exists for it
     - env: DEAL=8.3.0
     - env: DEAL=8.4.2

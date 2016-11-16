@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+language: generic
+services: docker
+
+before_script:
+    - export IMAGE="pymor/dealii-testing_pymor_0.4:dealii_${DEAL}"
+    - docker pull ${IMAGE}
+    - export ENV_FILE=${HOME}/env
+    - printenv | \grep TRAVIS > ${ENV_FILE}
+    - printenv | \grep encrypt >> ${ENV_FILE}
+    - printenv | \grep TEST >> ${ENV_FILE}
+    - export DOCKER_RUN="docker run --env-file ${ENV_FILE} -v ${TRAVIS_BUILD_DIR}:/home/dealii/src ${IMAGE}"
+
+script:
+    - ${DOCKER_RUN} /home/dealii/src/.travis.script.bash
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+    on_start: never
+matrix:
+  include:
+    - env: DEAL=8.2.0
+    - env: DEAL=8.3.0
+    - env: DEAL=8.4.2

@@ -12,9 +12,9 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(dealii_example) {
+PYBIND11_PLUGIN(dealii_elasticity) {
 
-  py::module m("dealii_example", "deal.II elasticity example");
+  py::module m("dealii_elasticity", "deal.II elasticity example");
 
   py::class_<ElasticityExample>(m, "ElasticityExample")
       .def(py::init<int>(), py::arg("refine_steps") = 4u)

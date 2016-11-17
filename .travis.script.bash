@@ -3,8 +3,13 @@
 set -e
 set -x
 
-cd /home/dealii/src
+BASE_DIR=/home/dealii/src
+export PYTHONPATH=${PYTHONPATH}:${BASE_DIR}/lib:${BASE_DIR}/src
+
+cd ${BASE_DIR}
 mkdir build && cd build
 cmake ..
 make
 
+cd ${BASE_DIR}/src/pydealii/pymor
+python demo.py

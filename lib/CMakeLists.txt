@@ -1,5 +1,6 @@
+add_subdirectory(pybind11)
 
-FIND_PACKAGE(deal.II 8.1 QUIET
+FIND_PACKAGE(deal.II 8.4 QUIET
   HINTS ${deal.II_DIR} ${DEAL_II_DIR} ../ ../../ $ENV{DEAL_II_DIR}
   )
 IF(NOT ${deal.II_FOUND})
@@ -11,40 +12,17 @@ IF(NOT ${deal.II_FOUND})
 ENDIF()
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
-project(Deal.II_bindings)
-
-# Add a CMake parameter for choosing a desired Python version
-set(REQUIRED_PYTHON_VERSION "2.7" CACHE STRING "Python version to use for compiling the example library")
-
-# Set a default build configuration if none is specified. 'MinSizeRel' produces the smallest binaries
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'MinSizeRel' as none was specified.")
-  set(CMAKE_BUILD_TYPE MinSizeRel CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
-endif()
-
-# Try to autodetect Python (can be overridden manually if needed)
-find_package(PythonLibs ${REQUIRED_PYTHON_VERSION} REQUIRED)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-include_directories(${PYTHON_INCLUDE_DIR})
-include_directories(./pybind11/include/)
-
 # Create the binding library
-add_library(pydealii_bindings SHARED bindings.cc)
+pybind11_add_module(pydealii_bindings bindings.cc)
 # Don't add a 'lib' prefix to the shared library
-set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
+# set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
 DEAL_II_SETUP_TARGET(pydealii_bindings)
-target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})
+# target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})
 
 # Create the example library
-add_library(dealii_example SHARED example.cc)
-set_target_properties(dealii_example PROPERTIES PREFIX "")
-DEAL_II_SETUP_TARGET(dealii_example)
-target_link_libraries(dealii_example ${PYTHON_LIBRARY})
-# target_link_libraries(dealii_example dealii_bindings)
+pybind11_add_module(dealii_elasticity py_elasticity.cc elasticity.cc)
+# set_target_properties(dealii_elasticity PROPERTIES PREFIX "")
+DEAL_II_SETUP_TARGET(dealii_elasticity)
 
-add_executable(eoc eoc.cc example.cc)
+add_executable(eoc eoc.cc elasticity.cc)
 DEAL_II_SETUP_TARGET(eoc)
-target_link_libraries(eoc ${PYTHON_LIBRARY})

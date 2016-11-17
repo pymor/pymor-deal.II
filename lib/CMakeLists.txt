@@ -1,6 +1,6 @@
 add_subdirectory(pybind11)
 
-FIND_PACKAGE(deal.II 8.4 QUIET
+FIND_PACKAGE(deal.II 8.2 QUIET
   HINTS ${deal.II_DIR} ${DEAL_II_DIR} ../ ../../ $ENV{DEAL_II_DIR}
   )
 IF(NOT ${deal.II_FOUND})

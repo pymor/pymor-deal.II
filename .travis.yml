@@ -20,6 +20,6 @@ notifications:
     on_start: never
 matrix:
   include:
-    #- env: DEAL=8.2.0#currently no docker image exists for it
+    - env: DEAL=8.2.0
     - env: DEAL=8.3.0
     - env: DEAL=8.4.2

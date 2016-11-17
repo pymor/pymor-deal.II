@@ -25,4 +25,5 @@ pybind11_add_module(dealii_elasticity py_elasticity.cc elasticity.cc)
 DEAL_II_SETUP_TARGET(dealii_elasticity)
 
 add_executable(eoc eoc.cc elasticity.cc)
+target_compile_options(eoc PUBLIC ${PYBIND11_CPP_STANDARD})
 DEAL_II_SETUP_TARGET(eoc)

@@ -4,7 +4,7 @@ set -e
 set -x
 
 BASE_DIR=/home/dealii/src
-export PYTHONPATH=${PYTHONPATH}:${BASE_DIR}/lib:${BASE_DIR}/src
+export PYTHONPATH=${PYTHONPATH}:${BASE_DIR}/build/lib:${BASE_DIR}/src
 
 cd ${BASE_DIR}
 mkdir build && cd build

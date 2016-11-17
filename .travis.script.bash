@@ -5,6 +5,6 @@ set -x
 
 cd /home/dealii/src
 mkdir build && cd build
-cmake .
+cmake ..
 make
 

@@ -4,7 +4,7 @@ set -e
 set -x
 
 cd /home/dealii/src
-cd lib
+mkdir build && cd build
 cmake .
 make
 

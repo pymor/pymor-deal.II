@@ -1,4 +1,4 @@
-FROM dealii/full-deps:manual
+FROM dealii/base:gcc-mpi
 MAINTAINER rene.milk@wwu.de
 
 ARG DEALII_VERSION
@@ -21,14 +21,6 @@ RUN pip install -U pip
 RUN pip install pymor==0.4.1
 USER ${USER}
 
-# rewrite these because the dealii/full-deps is based on dealii/clang-mpi
-ENV OMPI_CC gcc
-ENV OMPI_CXX g++
-ENV CC mpicc
-ENV CXX mpicxx
-ENV FC mpif90
-ENV FF mpif77
-
 RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src && \
     cd dealii-${DEALII_VERSION}-src && \
     git checkout ${DEALII_VERSION} && \
@@ -39,6 +31,7 @@ RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src 
           -DCMAKE_BUILD_TYPE=Release \
           -GNinja \
           ../ && \
+    ninja test && \
     ninja install
 ENV DEAL_II_DIR ~/dealii-${DEALII_VERSION}
 

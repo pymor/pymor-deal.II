@@ -5,7 +5,6 @@ ARG DEALII_VERSION
 
 USER root
 ENV DEBIAN_FRONTEND noninteractive
-#for add-apt-repo
 RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial main restricted universe multiverse" > /etc/apt/sources.list && \
     echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial-security main restricted universe multiverse" >> /etc/apt/sources.list && \
@@ -13,6 +12,7 @@ RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial main restricted uni
     echo "deb-src mirror://mirrors.ubuntu.com/mirrors.txt xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb-src mirror://mirrors.ubuntu.com/mirrors.txt xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
 RUN apt-get update
+#for add-apt-repo
 RUN apt-get install -y software-properties-common python-pip
 RUN add-apt-repository -y ppa:pymor/stable
 RUN apt-get update
@@ -30,11 +30,11 @@ RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src 
           -DCMAKE_INSTALL_PREFIX=~/dealii-${DEALII_VERSION} \
           -DCMAKE_BUILD_TYPE=Release \
           -GNinja \
-          ../ && \
-    ninja test && \
-    ninja install
+          ../
+# this solves compile error with gcc 5 and deal.II 8.2 and does nothing otherwise
+RUN sed -i ~/dealii-${DEALII_VERSION}-src/source/lac/solver_control.cc -e "s/\ isnan/\ std\:\:isnan/g"
+RUN cd ~/dealii-${DEALII_VERSION}-src/build && ninja test && ninja install
 ENV DEAL_II_DIR ~/dealii-${DEALII_VERSION}
-
 
 # THE END
 ENV DEBIAN_FRONTEND teletype

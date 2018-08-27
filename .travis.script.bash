@@ -4,11 +4,11 @@ set -e
 set -x
 
 BASE_DIR=/home/dealii/src
-export PYTHONPATH=${PYTHONPATH}:${BASE_DIR}/build/lib:${BASE_DIR}/src
+BUILD_DIR=/tmp/build
+export PYTHONPATH=${PYTHONPATH}:${BUILD_DIR}/lib:${BASE_DIR}/src
 
-cd ${BASE_DIR}
-mkdir build && cd build
-cmake ..
+mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+cmake ${BASE_DIR} 
 make
 
 cd ${BASE_DIR}/src/pydealii/pymor

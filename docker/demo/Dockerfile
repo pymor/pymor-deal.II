@@ -23,7 +23,7 @@ USER ${USER}
 
 RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src && \
     cd dealii-${DEALII_VERSION}-src && \
-    git checkout ${DEALII_VERSION} && \
+    git checkout v${DEALII_VERSION} && \
     mkdir build && cd build && \
     cmake -DDEAL_II_WITH_MPI=ON \
           -DDEAL_II_COMPONENT_EXAMPLES=OFF \

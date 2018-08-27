@@ -20,5 +20,5 @@ notifications:
     on_start: never
 matrix:
   include:
-    - env: DEAL=8.5.0
+    - env: DEAL=8.5.1
     - env: DEAL=9.0.0

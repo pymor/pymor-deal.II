@@ -19,7 +19,6 @@ RUN apt-get update
 #RUN apt-get build-dep -y --no-install-recommends python-pymor-demos
 RUN pip install -U pip
 RUN pip install pymor==0.4.1
-USER ${USER}
 
 RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src && \
     cd dealii-${DEALII_VERSION}-src && \
@@ -27,10 +26,12 @@ RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src 
     mkdir build && cd build && \
     cmake -DDEAL_II_WITH_MPI=ON \
           -DDEAL_II_COMPONENT_EXAMPLES=OFF \
-          -DCMAKE_INSTALL_PREFIX=~/dealii-${DEALII_VERSION} \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
           -DCMAKE_BUILD_TYPE=Release \
           -GNinja \
-          ../
+          ../ && \
+    ninja && ninja install
 
+USER ${USER}
 # THE END
 ENV DEBIAN_FRONTEND teletype

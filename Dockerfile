@@ -31,10 +31,6 @@ RUN git clone https://github.com/dealii/dealii.git dealii-${DEALII_VERSION}-src 
           -DCMAKE_BUILD_TYPE=Release \
           -GNinja \
           ../
-# this solves compile error with gcc 5 and deal.II 8.2 and does nothing otherwise
-RUN sed -i ~/dealii-${DEALII_VERSION}-src/source/lac/solver_control.cc -e "s/\ isnan/\ std\:\:isnan/g"
-RUN cd ~/dealii-${DEALII_VERSION}-src/build && ninja test && ninja install
-ENV DEAL_II_DIR ~/dealii-${DEALII_VERSION}
 
 # THE END
 ENV DEBIAN_FRONTEND teletype

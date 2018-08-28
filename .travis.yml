@@ -7,11 +7,11 @@ before_script:
     - export IMAGE="pymor/dealii-testing_pymor_0.4:dealii_${DEAL}"
     - docker pull ${IMAGE}
     - export ENV_FILE=${HOME}/env
-    - printenv | \grep TRAVIS > ${ENV_FILE}
-    - export DOCKER_RUN="docker run --env-file ${ENV_FILE} -v ${TRAVIS_BUILD_DIR}:/home/dealii/src ${IMAGE}"
+    - python3 ./.ci/make_env_file.py
+    - export DOCKER_RUN="docker run --privileged -e LOCAL_USER_ID=$(id -u) --env-file ${ENV_FILE} -v ${TRAVIS_BUILD_DIR}:/home/pymor/src ${IMAGE}"
 
 script:
-    - ${DOCKER_RUN} /home/dealii/src/.travis.script.bash
+    - ${DOCKER_RUN} /home/pymor/src/.ci/travis.script.bash
 
 notifications:
   email:

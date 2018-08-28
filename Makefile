@@ -1,7 +1,7 @@
-.PHONY: dockertest
+.PHONY: dockertest dockerrun
 
 DEAL=9.0.0
-IMAGE="pymor/dealii-testing_pymor_0.4:dealii_$(DEAL)"
+IMAGE="pymor/dealii-testing_pymor_master:dealii_$(DEAL)"
 
 dockertest:
 	make -C docker $(DEAL)

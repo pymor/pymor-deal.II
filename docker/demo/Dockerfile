@@ -46,7 +46,7 @@ RUN cd /tmp && git clone https://github.com/dealii/dealii.git dealii-${DEALII_VE
 # THE END
 ENV DEBIAN_FRONTEND teletype
 
-RUN apt-get install -y gosu
+RUN apt-get install -y gosu && pip install git+https://github.com/pymor/pymor#egg=pymor
 
 ADD entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

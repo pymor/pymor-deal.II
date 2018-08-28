@@ -1,18 +1,14 @@
-import timeit
-from functools import partial
-
 import itertools
-from pymor.reductors.stationary import reduce_stationary_coercive
+from pymor.reductors.coercive import CoerciveRBReductor
 
 from pymor.algorithms.greedy import greedy
 from pymor.parameters.base import Parameter
 from pymor.parameters.spaces import CubicParameterSpace
 from pymor.vectorarrays.list import ListVectorArray
 from pymor.operators.constructions import LincombOperator, VectorFunctional
-from pymor.algorithms.basisextension import gram_schmidt_basis_extension
+from pymor.algorithms.gram_schmidt import gram_schmidt
 from pymor.parameters.functionals import ProjectionParameterFunctional, ExpressionParameterFunctional, \
     GenericParameterFunctional
-from pymor.reductors.linear import reduce_stationary_affine_linear
 from pymor.discretizations.basic import StationaryDiscretization
 from pymor.tools.timing import Timer
 
@@ -48,12 +44,11 @@ py_disc = StationaryDiscretization(op, rhs, products={"energy": energy_op},
                                    parameter_space=CubicParameterSpace(parameter_type, LOW, HIGH))
 
 coercivity_estimator = ExpressionParameterFunctional("max(mu)", parameter_type)
-reductor = partial(reduce_stationary_coercive,
-                   error_product=energy_op, coercivity_estimator=coercivity_estimator)
+reductor = CoerciveRBReductor(py_disc, product=energy_op, coercivity_estimator=coercivity_estimator)
 
 greedy_data = greedy(py_disc, reductor, py_disc.parameter_space.sample_uniformly(3),
                      use_estimator=True,
-                     extension_algorithm=gram_schmidt_basis_extension, max_extensions=3)
+                     extension_algorithm=gram_schmidt, max_extensions=3)
 rb_disc, reconstructor = greedy_data['reduced_discretization'], greedy_data['reconstructor']
 
 half = (HIGH - LOW) / 2.

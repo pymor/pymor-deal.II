@@ -3,9 +3,9 @@
 # Copyright Holders: Rene Milk, Stephan Rave, Felix Schindler
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-from __future__ import absolute_import, division, print_function
 
-from itertools import izip
+
+
 from numbers import Number
 
 from pymor.operators.basic import OperatorBase
@@ -70,7 +70,7 @@ class DealIIMatrixOperator(OperatorBase):
         matrix = pd2.SparseMatrix(operators[0].matrix.get_sparsity_pattern())
         matrix.copy_from(operators[0].matrix)
         matrix *= coefficients[0]
-        for op, c in izip(operators[1:], coefficients[1:]):
+        for op, c in zip(operators[1:], coefficients[1:]):
             if isinstance(op, ZeroOperator):
                 continue
             matrix.add(c, op.matrix)

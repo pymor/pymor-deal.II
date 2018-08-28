@@ -3,7 +3,7 @@
 # Copyright Holders: Rene Milk, Stephan Rave, Felix Schindler
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-from __future__ import absolute_import, division, print_function
+
 
 from pymor.core.interfaces import ImmutableInterface
 from pymor.vectorarrays.interfaces import VectorArrayInterface
@@ -28,7 +28,7 @@ class DealIIVisualizer(ImmutableInterface):
         if len(U) == 1 and not legend:
             filenames = [base_name]
         else:
-            legend = legend or map(str, range(len(U)))
+            legend = legend or list(map(str, list(range(len(U)))))
             filenames = ['_'.join((base_name, l)) for l in legend]
 
         for u, n in zip(U, filenames):

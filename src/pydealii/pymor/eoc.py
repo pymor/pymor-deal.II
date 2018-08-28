@@ -1,10 +1,10 @@
 import logging
-from cPickle import dump, dumps
+from pickle import dump, dumps
 import numpy as np
 import matplotlib.pyplot as plt
 
 from pydealii_bindings import ElasticityEoc,ElasticityExample
-from plotting import elasticity_error_curves
+from .plotting import elasticity_error_curves
 
 logging.basicConfig()
 MARKERS = ['s', 'x', 'o', 'D', '+', '|', '*', '1', '2', '3', '4', '6', '7']
@@ -31,12 +31,12 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
         except RuntimeError as e:
             log.error('fine solve failed lvl {} -- lambda {}'.format(ref_level, lmbda))
             for coarse_level in levels:
-                if not errors.has_key(coarse_level):
+                if coarse_level not in errors:
                     errors[coarse_level] = []
                 errors[coarse_level].append(np.nan)
             continue
         for coarse_level in levels:
-            if not errors.has_key(coarse_level):
+            if coarse_level not in errors:
                 errors[coarse_level] = []
             coarse_disc = ElasticityExample(coarse_level)
             try:
@@ -49,7 +49,7 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
             prolonged = coarse_disc.transfer_to(ref_level - coarse_level, coarse_sol)
             prolonged -= ref_sol
             errors[coarse_level].append(coarse_disc.h1_0_semi_norm(prolonged)/coarse_disc.h1_0_semi_norm(ref_sol))
-    for coarse_level in errors.keys():
+    for coarse_level in list(errors.keys()):
         plt.plot(lambdas, errors[coarse_level], MARKERS[coarse_level])
 
     open('elas__{}__ref-{}_lambda-min_{}-max_{}_-_steps_{}.dump'.format(levels, ref_level, min_lambda, max_lambda, steps), 'wb').write(dumps((errors, lambdas)))
@@ -57,5 +57,5 @@ def elasticity_calculate_errors(ref_level=9,  levels=(1, 3, 5, 7), steps=10):
     elasticity_error_curves(errors, lambdas)
 
 if __name__ == '__main__':
-    elasticity_calculate_errors(levels=range(2, 8), steps=20, ref_level=9)
+    elasticity_calculate_errors(levels=list(range(2, 8)), steps=20, ref_level=9)
     # elasticity_eoc()

@@ -1,3 +1,6 @@
 [submodule "lib/pybind11"]
 	path = lib/pybind11
 	url = https://github.com/pybind/pybind11
+[submodule "pymor_src"]
+	path = pymor_src
+	url = https://github.com/pymor/pymor.git

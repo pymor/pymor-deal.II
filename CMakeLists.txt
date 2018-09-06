@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "MinSizeRel" "RelWithDebInfo")
 endif()
 # Add a CMake parameter for choosing a desired Python version
-set(PYBIND11_PYTHON_VERSION "2.7" CACHE STRING "Python version to use for compiling the example library")
+set(PYBIND11_PYTHON_VERSION "3" CACHE STRING "Python version to use for compiling the example library")
 
 add_subdirectory(lib)
 add_subdirectory(src)

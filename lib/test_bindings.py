@@ -1,3 +1,7 @@
+# This file is part of the pyMOR project (http://www.pymor.org).
+# Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
+# License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
+
 import pytest
 import numpy as np
 import pydealii_bindings as dealii

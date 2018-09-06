@@ -8,7 +8,7 @@ from pymor.reductors.coercive import CoerciveRBReductor
 from pymor.algorithms.greedy import greedy
 from pymor.parameters.base import Parameter
 from pymor.parameters.spaces import CubicParameterSpace
-from pymor.operators.constructions import LincombOperator, VectorFunctional
+from pymor.operators.constructions import LincombOperator, VectorOperator
 from pymor.algorithms.gram_schmidt import gram_schmidt
 from pymor.parameters.functionals import ProjectionParameterFunctional, ExpressionParameterFunctional
 from pymor.discretizations.basic import StationaryDiscretization
@@ -32,7 +32,7 @@ lambda_fn, mu_fn = [ProjectionParameterFunctional(n, ()) for n in ['lambda', 'mu
 LOW, HIGH = 1, 10
 ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat', 'mu_mat']]
 op = LincombOperator(ops, (lambda_fn, mu_fn))
-rhs = VectorFunctional(op.range.make_array([cpp_disc.rhs()]))
+rhs = VectorOperator(op.range.make_array([cpp_disc.rhs()]))
 viz = PyVis(cpp_disc)
 h1_op = DealIIMatrixOperator(cpp_disc.h1_mat(), "h1_0_semi")
 energy_op = DealIIMatrixOperator(cpp_disc.mu_mat(), "energy")

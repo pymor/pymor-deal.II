@@ -5,9 +5,9 @@ set -x
 
 BASE_DIR=/src
 BUILD_DIR=/tmp/build
-export PYTHONPATH=${BUILD_DIR}/lib
+export PYTHONPATH=${BUILD_DIR}/lib:/src/src
 # Using
-#   export PYTHONPATH=${BUILD_DIR}/lib:${PYTHONPATH}
+#   export PYTHONPATH=${BUILD_DIR}/lib:/src/src:${PYTHONPATH}
 # will fail with empty PYTHONPATH as the empty string
 # after ':' will be treated as the current directory
 # in which the operator module is imported instead of

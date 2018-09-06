@@ -3,11 +3,6 @@
 # Copyright Holders: Rene Milk, Stephan Rave, Felix Schindler
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-
-
-
-from numbers import Number
-
 from pymor.operators.basic import OperatorBase
 from pymor.operators.constructions import ZeroOperator
 
@@ -26,39 +21,26 @@ class DealIIMatrixOperator(OperatorBase):
         self.matrix = matrix
         self.name = name
 
-    def apply(self, U, ind=None, mu=None):
+    def apply(self, U, mu=None):
         assert U in self.source
-        assert U.check_ind(ind)
-        vectors = U._list if ind is None else [U._list[ind]] if isinstance(ind, Number) else [U._list[i] for i in ind]
-        R = self.range.zeros(len(vectors))
-        for u, r in zip(vectors, R._list):
+        R = self.range.zeros(len(U))
+        for u, r in zip(U._list, R._list):
             self.matrix.vmult(r.impl, u.impl)
         return R
 
-    def apply_adjoint(self, U, ind=None, mu=None, source_product=None, range_product=None):
-        assert U in self.range
-        assert U.check_ind(ind)
-        assert source_product is None or source_product.source == source_product.range == self.source
-        assert range_product is None or range_product.source == range_product.range == self.range
-        if range_product:
-            PrU = range_product.apply(U, ind=ind)._list
-        else:
-            PrU = U._list if ind is None else [U._list[ind]] if isinstance(ind, Number) else [U._list[i] for i in ind]
-        ATPrU = self.source.zeros(len(PrU))
-        for u, r in zip(PrU, ATPrU._list):
+    def apply_transpose(self, V, mu=None):
+        assert V in self.range
+        U = self.source.zeros(len(V))
+        for u, r in zip(V._list, U._list):
             self.matrix.Tvmult(r.impl, u.impl)
-        if source_product:
-            return source_product.apply_inverse(ATPrU)
-        else:
-            return ATPrU
+        return U
 
-    def apply_inverse(self, V, ind=None, mu=None, least_squares=False):
+    def apply_inverse(self, V, mu=None, least_squares=False):
         assert V in self.range
         if least_squares:
             raise NotImplementedError
-        vectors = V._list if ind is None else [V._list[ind]] if isinstance(ind, Number) else [V._list[i] for i in ind]
-        R = self.source.zeros(len(vectors))
-        for r, v in zip(R._list, vectors):
+        R = self.source.zeros(len(V))
+        for r, v in zip(R._list, V._list):
             self.matrix.cg_solve(r.impl, v.impl)
         return R
 

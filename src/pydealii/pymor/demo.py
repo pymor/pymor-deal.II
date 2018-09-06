@@ -2,62 +2,66 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-import itertools
-from pymor.reductors.coercive import CoerciveRBReductor
+from pymor.basic import *
 
-from pymor.algorithms.greedy import greedy
-from pymor.parameters.base import Parameter
-from pymor.parameters.spaces import CubicParameterSpace
-from pymor.operators.constructions import LincombOperator, VectorOperator
-from pymor.algorithms.gram_schmidt import gram_schmidt
-from pymor.parameters.functionals import ProjectionParameterFunctional, ExpressionParameterFunctional
-from pymor.discretizations.basic import StationaryDiscretization
-from pymor.tools.timing import Timer
 
+# instantiate deal.II model
 from dealii_elasticity import ElasticityExample
-from pydealii.pymor.operator import DealIIMatrixOperator
-
-
-class PyVis(object):
-    def __init__(self, cpp_disc):
-        self._cpp_disc = cpp_disc
-
-    def visualize(self, U, _, filename):
-        self._cpp_disc.visualize(U._list[0].impl, filename)
-
-
 cpp_disc = ElasticityExample(refine_steps=7)
 
-lambda_fn, mu_fn = [ProjectionParameterFunctional(n, ()) for n in ['lambda', 'mu']]
-LOW, HIGH = 1, 10
-ops = [DealIIMatrixOperator(getattr(cpp_disc, name)()) for name in ['lambda_mat', 'mu_mat']]
-op = LincombOperator(ops, (lambda_fn, mu_fn))
-rhs = VectorOperator(op.range.make_array([cpp_disc.rhs()]))
-viz = PyVis(cpp_disc)
-h1_op = DealIIMatrixOperator(cpp_disc.h1_mat(), "h1_0_semi")
-energy_op = DealIIMatrixOperator(cpp_disc.mu_mat(), "energy")
-py_disc = StationaryDiscretization(op, rhs, products={"energy": energy_op},
-                                   visualizer=viz,
-                                   parameter_space=CubicParameterSpace(op.parameter_type, LOW, HIGH))
 
-coercivity_estimator = ExpressionParameterFunctional("max(mu)", py_disc.parameter_type)
-reductor = CoerciveRBReductor(py_disc, product=energy_op, coercivity_estimator=coercivity_estimator)
+# wrap as pyMOR discretization
+from pydealii.pymor.operator import DealIIMatrixOperator
+from pydealii.pymor.vectorarray import DealIIVectorSpace
+from pydealii.pymor.gui import DealIIVisualizer
 
-greedy_data = greedy(py_disc, reductor, py_disc.parameter_space.sample_uniformly(3),
+d = StationaryDiscretization(
+    operator=LincombOperator([DealIIMatrixOperator(cpp_disc.lambda_mat()), DealIIMatrixOperator(cpp_disc.mu_mat())],
+                             [ProjectionParameterFunctional('lambda', ()), ProjectionParameterFunctional('mu', ())]),
+
+    rhs=VectorOperator(DealIIVectorSpace.make_array([cpp_disc.rhs()])),
+
+    products={'energy': DealIIMatrixOperator(cpp_disc.mu_mat())},
+
+    visualizer=DealIIVisualizer(cpp_disc)
+)
+d = d.with_(parameter_space=CubicParameterSpace(d.parameter_type, 1, 10))
+
+
+# choose reduction method
+reductor = CoerciveRBReductor(
+    d,
+    product=d.energy_product,
+    coercivity_estimator=ExpressionParameterFunctional("max(mu)", d.parameter_type)
+)
+
+
+# greedy basis generation
+greedy_data = greedy(d, reductor, d.parameter_space.sample_uniformly(3),
                      use_estimator=True,
-                     extension_params={'method': 'gram_schmidt'}, max_extensions=3)
-rb_disc = greedy_data['rd']
+                     extension_params={'method': 'gram_schmidt'}, max_extensions=5)
 
-half = (HIGH - LOW) / 2.
-values = itertools.product((LOW, HIGH, half), (LOW, HIGH, half))
-for new_param in ({"lambda": [a], "mu": [b]} for a, b in values):
-    for disc, s in [(cpp_disc, 'cpp'), (py_disc, 'py'), (rb_disc, 'rb')]:
-        with Timer(s):
-            solution = disc.solve(new_param)
-            try:
-                disc.visualize(solution, filename='param_{}-{}.vtk'.format(new_param, s))
-            except NotImplementedError:
-                py_disc.visualize(reductor.reconstruct(solution), filename='param_{}-{}.vtk'.format(new_param, s))
 
-            fr = disc.energy_norm(solution)
-            print('Type: {}\nParam: {}\nNorm: {}'.format(s, new_param, fr))
+# get reduced order model
+rd = greedy_data['rd']
+
+
+# validate reduced order model
+result = reduction_error_analysis(rd, d, reductor,
+                                  test_mus=10, basis_sizes=reductor.RB.dim + 1,
+                                  estimator=True, condition=True, error_norms=[d.energy_norm],
+                                  plot=True)
+
+
+# visualize solution for parameter with maximum reduction error
+mu_max = result['max_error_mus'][0, -1]
+U = d.solve(mu_max)
+U_rb = reductor.reconstruct(rd.solve(mu_max))
+ERR = U - U_rb
+d.visualize([U, U_rb, ERR], legend=['fom', 'rom', 'error'])
+
+
+# print/plot results of validation
+from matplotlib import pyplot as plt
+print(result['summary'])
+plt.show()

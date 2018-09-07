@@ -5,7 +5,7 @@ PY=3.5
 IMAGE="pymor/dealii:v$(DEAL)_py$(PY)"
 
 dockertest:
-	docker run -v $(shell pwd):/src $(IMAGE) /src/.ci/travis.script.bash
+	docker run -v $(shell pwd):/home/pymor/src $(IMAGE) /home/pymor/src/.ci/travis.script.bash
 
 dockerrun:
-	docker run -it -v $(shell pwd):/src $(IMAGE) bash
+	docker run -it -v $(shell pwd):/home/pymor/src $(IMAGE) bash

@@ -10,4 +10,6 @@ def test_demo_results():
     from pydealii.pymor.demo import run
     result = run()
 
-    assert result == good_result
+    compare = ['errors', 'basis_sizes', 'mus', 'norms']
+    for key in compare:
+        assert (result[key] == good_result[key]).all()

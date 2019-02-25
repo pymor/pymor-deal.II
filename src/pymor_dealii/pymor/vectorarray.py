@@ -3,7 +3,7 @@
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
 try:
-    import pydealii_bindings as pd2
+    import pymor_dealii_bindings as pd2
     HAVE_DEALII = True
 except ImportError:
     HAVE_DEALII = False

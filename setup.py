@@ -61,7 +61,7 @@ setup(
     version='0.1',
     # setuptools.find_package does not work here
     packages=['src/pymor_dealii', 'src/pymor_dealii/pymor'],
-    ext_modules=[CMakeExtension('deal.II bindings')],
+    ext_modules=[CMakeExtension('pymor_dealii')],
     cmdclass={
         'build_ext': build_ext,
     }

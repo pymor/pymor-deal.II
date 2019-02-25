@@ -5,8 +5,8 @@
 from pymor.operators.basic import OperatorBase
 from pymor.operators.constructions import ZeroOperator
 
-from pydealii.pymor.vectorarray import DealIIVectorSpace
-import pydealii_bindings as pd2
+from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
+import pymor_dealii_bindings as pd2
 
 
 class DealIIMatrixOperator(OperatorBase):

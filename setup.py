@@ -53,15 +53,15 @@ class build_ext(build_ext_orig):
 
 
 setup(
-    name='pymor-deal.II',
+    name='pymor_dealii',
     author='pyMOR developers',
     author_email='pymor-dev@listserv.uni-muenster.de',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     version='0.1',
     # setuptools.find_package does not work here
-    packages=['src/pydealii', 'src/pydealii/pymor'],
-    ext_modules=[CMakeExtension('src/pydealii/lib')],
+    packages=['src/pymor_dealii', 'src/pymor_dealii/pymor'],
+    ext_modules=[CMakeExtension('deal.II bindings')],
     cmdclass={
         'build_ext': build_ext,
     }

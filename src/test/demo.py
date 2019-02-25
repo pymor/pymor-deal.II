@@ -8,7 +8,7 @@ def test_demo_results():
     fn = Path(__file__).resolve().parent / 'demo_result.pickle'
     good_result = pickle.load(open(str(fn), 'rb'))
 
-    from pydealii.pymor.demo import run
+    from pymor_dealii.pymor.demo import run
     result = run()
 
     compare = ['errors', 'basis_sizes', 'rel_errors', 'estimates']

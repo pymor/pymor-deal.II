@@ -1,7 +1,7 @@
 .PHONY: dockertest dockerrun
 
-DEAL=9.0.0
-PY=3.5
+DEAL=9.0.1
+PY=3.7
 IMAGE="pymor/dealii:v$(DEAL)_py$(PY)"
 
 dockertest:

@@ -11,9 +11,9 @@ cpp_disc = ElasticityExample(refine_steps=7)
 
 
 # wrap as pyMOR discretization
-from pydealii.pymor.operator import DealIIMatrixOperator
-from pydealii.pymor.vectorarray import DealIIVectorSpace
-from pydealii.pymor.gui import DealIIVisualizer
+from pymor_dealii.pymor.operator import DealIIMatrixOperator
+from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
+from pymor_dealii.pymor.gui import DealIIVisualizer
 
 
 def run():

@@ -13,11 +13,11 @@ ENDIF()
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
 # Create the binding library
-pybind11_add_module(pydealii_bindings bindings.cc)
+pybind11_add_module(pymor_dealii_bindings bindings.cc)
 # Don't add a 'lib' prefix to the shared library
-# set_target_properties(pydealii_bindings PROPERTIES PREFIX "")
-DEAL_II_SETUP_TARGET(pydealii_bindings)
-# target_link_libraries(pydealii_bindings ${PYTHON_LIBRARY})
+# set_target_properties(pymor_dealii_bindings PROPERTIES PREFIX "")
+DEAL_II_SETUP_TARGET(pymor_dealii_bindings)
+# target_link_libraries(pymor_dealii_bindings ${PYTHON_LIBRARY})
 
 # Create the example library
 pybind11_add_module(dealii_elasticity py_elasticity.cc elasticity.cc)

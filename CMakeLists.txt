@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(pymor-deal.II)
+project(pymor_dealii)
 
 # Set a default build configuration if none is specified. 'MinSizeRel' produces the smallest binaries
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

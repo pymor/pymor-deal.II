@@ -150,8 +150,8 @@ void bind_sparse_matrix(pybind11::module& module) {
       .def("cg_solve", cg_solve);
 }
 
-PYBIND11_PLUGIN(pydealii_bindings) {
-  py::module m("pydealii_bindings", "Python bindings for deal.II");
+PYBIND11_PLUGIN(pymor_dealii_bindings) {
+  py::module m("pymor_dealii_bindings", "Python bindings for deal.II");
   py::class_<dealii::SparsityPattern>(m, "SparsityPattern");
   bind_vector<double>(m);
   bind_sparse_matrix<double>(m);

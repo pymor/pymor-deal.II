@@ -59,8 +59,8 @@ setup(
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     version='0.1',
-    # setuptools.find_package does not work here
-    packages=['src/pymor_dealii', 'src/pymor_dealii/pymor'],
+    package_dir={'': 'src'},
+    packages=find_packages('src'),
     ext_modules=[CMakeExtension('pymor_dealii')],
     cmdclass={
         'build_ext': build_ext,

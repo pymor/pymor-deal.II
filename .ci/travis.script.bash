@@ -13,10 +13,8 @@ export PYTHONPATH=${BASE_DIR}/lib:${BASE_DIR}/src
 # the operator module from stdlib.
 cd ${BASE_DIR}
 python setup.py build_ext -i
-cd ${BASE_DIR}/pymor_src
-pip install -e .
-pip install -r requirements-travis.txt
-pip install -r requirements-optional.txt
+
+pip install pymor[full]==0.5.1 pytest
 
 cd ${BASE_DIR}/src/
 xvfb-run -a pytest test/demo.py

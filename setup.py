@@ -58,7 +58,7 @@ setup(
     author_email='pymor-dev@listserv.uni-muenster.de',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
-    version='0.1',
+    version='0.5.0',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     ext_modules=[CMakeExtension('pymor_dealii')],

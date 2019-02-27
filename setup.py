@@ -59,6 +59,7 @@ setup(
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     version='0.5.0',
+    install_requires=['pymor>=0.5,<0.6'],
     package_dir={'': 'src'},
     packages=find_packages('src'),
     ext_modules=[CMakeExtension('pymor_dealii')],

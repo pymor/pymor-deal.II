@@ -13,9 +13,9 @@ BASE_DIR=/home/pymor/src
 # the operator module from stdlib.
 cd ${BASE_DIR}
 
-pip install pytest
+pip install -U pip pytest
 
-pip install git+https://github.com/pymor/pymor.git[full]#egg=pymor
+pip install git+https://github.com/pymor/pymor.git#egg=pymor[full]
 # if we're in a versioned branch pip will downgrade pymor here from pypi
 pip install .
 

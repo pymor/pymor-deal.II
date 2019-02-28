@@ -13,8 +13,11 @@ BASE_DIR=/home/pymor/src
 # the operator module from stdlib.
 cd ${BASE_DIR}
 
-pip install pymor[full]==0.5.1 pytest
+pip install pytest
+
+pip install git+https://github.com/pymor/pymor.git[full]#egg=pymor
+# if we're in a versioned branch pip will downgrade pymor here from pypi
 pip install .
 
 cd ${BASE_DIR}/src/
-xvfb-run -a pytest test/demo.py
+xvfb-run -a pytest -s -r sxX  test/demo.py

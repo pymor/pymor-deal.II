@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: generic
 services: docker
 
@@ -20,9 +20,7 @@ notifications:
     on_start: never
 matrix:
   include:
-    - env: DEAL=8.5.1 PY=3.5
     - env: DEAL=8.5.1 PY=3.6
     - env: DEAL=8.5.1 PY=3.7
-    - env: DEAL=9.0.0 PY=3.5
     - env: DEAL=9.0.0 PY=3.6
     - env: DEAL=9.0.0 PY=3.7

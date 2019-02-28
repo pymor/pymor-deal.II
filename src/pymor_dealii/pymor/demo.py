@@ -4,7 +4,6 @@
 
 from pymor.basic import *
 
-
 # instantiate deal.II model
 from dealii_elasticity import ElasticityExample
 cpp_disc = ElasticityExample(refine_steps=7)
@@ -17,7 +16,7 @@ from pymor_dealii.pymor.gui import DealIIVisualizer
 
 
 def run():
-    d = StationaryDiscretization(
+    d = StationaryModel(
         operator=LincombOperator([DealIIMatrixOperator(cpp_disc.lambda_mat()), DealIIMatrixOperator(cpp_disc.mu_mat())],
                                 [ProjectionParameterFunctional('lambda', ()), ProjectionParameterFunctional('mu', ())]),
 
@@ -45,12 +44,12 @@ def run():
 
 
     # get reduced order model
-    rd = greedy_data['rd']
+    rd = greedy_data['rom']
 
 
     # validate reduced order model
     result = reduction_error_analysis(rd, d, reductor,
-                                    test_mus=10, basis_sizes=reductor.RB.dim + 1,
+                                    test_mus=10, basis_sizes=reductor.bases['RB'].dim + 1,
                                     estimator=True, condition=True, error_norms=[d.energy_norm],
                                     plot=True)
 

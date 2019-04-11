@@ -58,7 +58,7 @@ setup(
     author_email='pymor-dev@listserv.uni-muenster.de',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
-    version='0.5.0',
+    version='0.5.2',
     install_requires=['pymor>=0.5,<0.6'],
     package_dir={'': 'src'},
     packages=find_packages('src'),

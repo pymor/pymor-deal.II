@@ -1,4 +1,5 @@
 graft lib
+graft src
 include CMakeLists.txt
 include README.md
 include LICENSE

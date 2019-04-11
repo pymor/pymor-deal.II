@@ -62,6 +62,7 @@ setup(
     install_requires=['pymor[full]'],
     package_dir={'': 'src'},
     packages=find_packages('src'),
+    include_package_data=True,
     ext_modules=[CMakeExtension('pymor_dealii')],
     cmdclass={
         'build_ext': build_ext,

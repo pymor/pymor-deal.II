@@ -17,8 +17,7 @@ class DealIIMatrixOperator(OperatorBase):
     def __init__(self, matrix, name=None):
         self.source = DealIIVectorSpace(matrix.m())
         self.range = DealIIVectorSpace(matrix.n())
-        self.matrix = matrix
-        self.name = name
+        self.__auto_init(locals())
 
     def apply(self, U, mu=None):
         assert U in self.source

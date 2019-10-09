@@ -18,7 +18,7 @@ class DealIIVector(CopyOnWriteVector):
     """Wraps a DealII vector to make it usable with ListVectorArray."""
 
     def __init__(self, impl):
-        self.impl = impl
+        self.__auto_init(locals())
 
     @classmethod
     def from_instance(cls, instance):
@@ -105,9 +105,8 @@ class DealIIVector(CopyOnWriteVector):
 
 class DealIIVectorSpace(ListVectorSpace):
 
-    def __init__(self, dim, id_=None):
-        self.dim = dim
-        self.id = id_
+    def __init__(self, dim, id=None):
+        self.__auto_init(locals())
 
     def __eq__(self, other):
         return type(other) is DealIIVectorSpace and self.dim == other.dim and self.id == other.id

@@ -3,7 +3,7 @@
 set -e
 set -x
 
-BASE_DIR=/home/pymor/src
+BASE_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})" ; cd ../ ; pwd -P )"
 
 # Using
 #   export PYTHONPATH=${BUILD_DIR}/lib:${BASE_DIR}/src:${PYTHONPATH}
@@ -12,10 +12,13 @@ BASE_DIR=/home/pymor/src
 # in which the operator module is imported instead of
 # the operator module from stdlib.
 cd ${BASE_DIR}
+git submodule update --init
 
+python -m venv ~/venv
+source ~/venv/bin/activate
 pip install -U pip pytest
 
-pip install git+https://github.com/pymor/pymor.git#egg=pymor[full]
+pip install git+https://github.com/pymor/pymor.git#egg=pymor
 # if we're in a versioned branch pip will downgrade pymor here from pypi
 pip install .
 

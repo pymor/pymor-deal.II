@@ -1,0 +1,12 @@
+pool:
+  vmImage: 'ubuntu-16.04'
+
+strategy:
+  matrix:
+    9_3.7:
+      containerImage: pymor/dealii:v9.0.0_py3.7
+
+container: $[ variables['containerImage'] ]
+
+steps:
+- script: ./.ci/travis.script.bash

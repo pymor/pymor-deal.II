@@ -9,7 +9,7 @@ def test_demo_results():
     good_result = pickle.load(open(str(fn), 'rb'))
 
     from pymor_dealii.pymor.demo import run
-    result = run()
+    result, _, _, _ = run(plot_error=False)
 
     compare = ['errors', 'basis_sizes', 'rel_errors', 'estimates']
     for key in compare:

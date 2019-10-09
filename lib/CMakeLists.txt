@@ -1,15 +1,6 @@
 add_subdirectory(pybind11)
 
-FIND_PACKAGE(deal.II 8.2 QUIET
-  HINTS ${deal.II_DIR} ${DEAL_II_DIR} ../ ../../ $ENV{DEAL_II_DIR}
-  )
-IF(NOT ${deal.II_FOUND})
-  MESSAGE(FATAL_ERROR "\n"
-    "*** Could not locate deal.II. ***\n\n"
-    "You may want to either pass a flag -DDEAL_II_DIR=/path/to/deal.II to cmake\n"
-    "or set an environment variable \"DEAL_II_DIR\" that contains this path."
-    )
-ENDIF()
+FIND_PACKAGE(deal.II 8.5 QUIET CONFIG REQUIRED)
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
 # Create the binding library

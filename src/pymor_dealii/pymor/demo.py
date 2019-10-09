@@ -15,7 +15,7 @@ from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
 from pymor_dealii.pymor.gui import DealIIVisualizer
 
 
-def run():
+def run(plot_error=True):
     d = StationaryModel(
         operator=LincombOperator([DealIIMatrixOperator(cpp_disc.lambda_mat()), DealIIMatrixOperator(cpp_disc.mu_mat())],
                                 [ProjectionParameterFunctional('lambda', ()), ProjectionParameterFunctional('mu', ())]),
@@ -51,22 +51,21 @@ def run():
     result = reduction_error_analysis(rd, d, reductor,
                                     test_mus=10, basis_sizes=reductor.bases['RB'].dim + 1,
                                     estimator=True, condition=True, error_norms=[d.energy_norm],
-                                    plot=True)
+                                    plot=plot_error)
 
 
     # visualize solution for parameter with maximum reduction error
     mu_max = result['max_error_mus'][0, -1]
     U = d.solve(mu_max)
     U_rb = reductor.reconstruct(rd.solve(mu_max))
-    ERR = U - U_rb
-    d.visualize([U, U_rb, ERR], legend=['fom', 'rom', 'error'])
-
-    return result
+    return result, U, U_rb, d
 
 
 if __name__ == '__main__':
     # print/plot results of validation
     from matplotlib import pyplot as plt
-    result = run()
+    result, U, U_rb, d = run()
     print(result['summary'])
+    ERR = U - U_rb
+    d.visualize([U, U_rb, ERR], legend=['fom', 'rom', 'error'])
     plt.show()

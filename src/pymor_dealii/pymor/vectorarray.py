@@ -112,12 +112,12 @@ class DealIIVectorSpace(ListVectorSpace):
         return type(other) is DealIIVectorSpace and self.dim == other.dim and self.id == other.id
 
     @classmethod
-    def space_from_vector_obj(cls, vec, id_):
-        return cls(vec.size(), id_)
+    def space_from_vector_obj(cls, vec, id):
+        return cls(vec.size(), id)
 
     @classmethod
-    def space_from_dim(cls, dim, id_):
-        return cls(dim, id_)
+    def space_from_dim(cls, dim, id):
+        return cls(dim, id)
 
     def zero_vector(self):
         return DealIIVector(pd2.Vector(self.dim))

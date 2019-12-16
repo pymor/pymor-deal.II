@@ -10,6 +10,7 @@ def test_demo_results():
 
     from pymor_dealii.pymor.demo import run
     result, _, _, _ = run(plot_error=False)
+    pickle.dump(result, open(Path(__file__).resolve().parent / 'actual_demo_result.pickle', 'wb'))
 
     compare = ['errors', 'basis_sizes', 'rel_errors', 'estimates']
     for key in compare:

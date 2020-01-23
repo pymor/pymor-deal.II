@@ -2,14 +2,14 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-from pymor.operators.basic import OperatorBase
+from pymor.operators.interface import Operator
 from pymor.operators.constructions import ZeroOperator
 
 from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
 import pymor_dealii_bindings as pd2
 
 
-class DealIIMatrixOperator(OperatorBase):
+class DealIIMatrixOperator(Operator):
     """Wraps a dealII matrix as an |Operator|."""
 
     linear = True

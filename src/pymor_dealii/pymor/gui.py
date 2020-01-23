@@ -2,17 +2,17 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-from pymor.core.interfaces import ImmutableInterface
-from pymor.vectorarrays.interfaces import VectorArrayInterface
+from pymor.core.base import ImmutableObject
+from pymor.vectorarrays.interface import VectorArray
 
 
-class DealIIVisualizer(ImmutableInterface):
+class DealIIVisualizer(ImmutableObject):
 
     def __init__(self, impl):
         self.impl = impl
 
     def visualize(self, U, discretization, title=None, legend=None, separate_colorbars=True, filename=None):
-        if isinstance(U, VectorArrayInterface):
+        if isinstance(U, VectorArray):
             U = [U]
         if any(len(u) != 1 for u in U):
             raise NotImplementedError

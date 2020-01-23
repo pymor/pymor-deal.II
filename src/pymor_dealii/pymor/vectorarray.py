@@ -10,7 +10,6 @@ except ImportError:
 
 import numpy as np
 
-from pymor.vectorarrays.interfaces import VectorSpaceInterface
 from pymor.vectorarrays.list import ListVectorSpace, CopyOnWriteVector
 
 

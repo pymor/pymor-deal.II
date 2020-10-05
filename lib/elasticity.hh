@@ -18,7 +18,6 @@
 #include <deal.II/grid/grid_refinement.h>
 #include <deal.II/grid/tria.h>
 #include <deal.II/grid/tria_accessor.h>
-#include <deal.II/grid/tria_boundary_lib.h>
 #include <deal.II/grid/tria_iterator.h>
 #include <deal.II/lac/constraint_matrix.h>
 #include <deal.II/lac/full_matrix.h>

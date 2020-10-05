@@ -3,8 +3,12 @@ pool:
 
 strategy:
   matrix:
-    9_3.7:
-      containerImage: pymor/dealii:v9.0.0_py3.7
+    9.2_3.6:
+      containerImage: pymor/dealii_py3.6:93e0f6225eeaae049ca3b392f77cd8d4150ee590
+    9.2_3.7:
+      containerImage: pymor/dealii_py3.7:93e0f6225eeaae049ca3b392f77cd8d4150ee590
+    9.2_3.8:
+      containerImage: pymor/dealii_py3.8:93e0f6225eeaae049ca3b392f77cd8d4150ee590
 
 container: $[ variables['containerImage'] ]
 

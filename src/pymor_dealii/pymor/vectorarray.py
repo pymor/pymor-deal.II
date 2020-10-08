@@ -57,10 +57,10 @@ class DealIIVector(CopyOnWriteVector):
         # dealII throws an exception on 0 length norms
         return 0 if self.dim == 0 else self.impl.l1_norm()
 
-    def l2_norm(self):
+    def norm(self):
         return 0 if self.dim == 0 else self.impl.l2_norm()
 
-    def l2_norm2(self):
+    def norm2(self):
         return 0 if self.dim == 0 else self.impl.l2_norm()**2
 
     def sup_norm(self):

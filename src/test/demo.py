@@ -12,6 +12,6 @@ def test_demo_results():
     result, _, _, _ = run(plot_error=False)
     pickle.dump(result, open(Path(__file__).resolve().parent / 'actual_demo_result.pickle', 'wb'))
 
-    compare = ['errors', 'basis_sizes', 'rel_errors', 'estimates']
+    compare = ['errors', 'basis_sizes', 'rel_errors']
     for key in compare:
         assert np.allclose(result[key], good_result[key])

@@ -50,7 +50,7 @@ class DealIIVector(CopyOnWriteVector):
         else:
             self.impl.axpy(alpha, x.impl)
 
-    def dot(self, other):
+    def inner(self, other):
         return 0 if self.dim == 0 else self.impl * other.impl
 
     def l1_norm(self):

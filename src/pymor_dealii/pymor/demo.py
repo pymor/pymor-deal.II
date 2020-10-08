@@ -18,7 +18,7 @@ from pymor_dealii.pymor.gui import DealIIVisualizer
 def run(plot_error=True):
     d = StationaryModel(
         operator=LincombOperator([DealIIMatrixOperator(cpp_disc.lambda_mat()), DealIIMatrixOperator(cpp_disc.mu_mat())],
-                                [ProjectionParameterFunctional('lambda', ()), ProjectionParameterFunctional('mu', ())]),
+                                [ProjectionParameterFunctional('lambda'), ProjectionParameterFunctional('mu')]),
 
         rhs=VectorOperator(DealIIVectorSpace.make_array([cpp_disc.rhs()])),
 
@@ -26,20 +26,19 @@ def run(plot_error=True):
 
         visualizer=DealIIVisualizer(cpp_disc)
     )
-    d = d.with_(parameter_space=CubicParameterSpace(d.parameter_type, 1, 10))
+    parameter_space = d.parameters.space((1,10))
 
 
     # choose reduction method
     reductor = CoerciveRBReductor(
         d,
         product=d.energy_product,
-        coercivity_estimator=ExpressionParameterFunctional("max(mu)", d.parameter_type)
+        coercivity_estimator=ExpressionParameterFunctional("max(mu)", d.parameters)
     )
 
 
     # greedy basis generation
-    greedy_data = greedy(d, reductor, d.parameter_space.sample_uniformly(3),
-                        use_estimator=True,
+    greedy_data = rb_greedy(d, reductor, parameter_space.sample_uniformly(3),
                         extension_params={'method': 'gram_schmidt'}, max_extensions=5)
 
 
@@ -49,8 +48,9 @@ def run(plot_error=True):
 
     # validate reduced order model
     result = reduction_error_analysis(rd, d, reductor,
-                                    test_mus=10, basis_sizes=reductor.bases['RB'].dim + 1,
-                                    estimator=True, condition=True, error_norms=[d.energy_norm],
+                                    test_mus=parameter_space.sample_randomly(10),
+                                    basis_sizes=reductor.bases['RB'].dim + 1,
+                                    condition=True, error_norms=[d.energy_norm],
                                     plot=plot_error)
 
 

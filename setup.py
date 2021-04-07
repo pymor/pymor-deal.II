@@ -55,11 +55,11 @@ class build_ext(build_ext_orig):
 setup(
     name='pymor_dealii',
     author='pyMOR developers',
-    author_email='pymor-dev@listserv.uni-muenster.de',
+    author_email='contact@pymor.org',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     version='2019.2rc0',
-    install_requires=['pymor[full]'],
+    install_requires=[],
     package_dir={'': 'src'},
     packages=find_packages('src'),
     include_package_data=True,

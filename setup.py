@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+import versioneer
 
 from setuptools import setup, Extension
 from setuptools import find_packages
@@ -51,20 +52,20 @@ class build_ext(build_ext_orig):
             self.spawn(['cmake', '--build', '.'] + build_args)
         os.chdir(str(cwd))
 
+cmdclass=versioneer.get_cmdclass()  
+cmdclass['build_ext'] = build_ext
 
-setup(
+setup( 
+    version=versioneer.get_version(),
     name='pymor_dealii',
     author='pyMOR developers',
     author_email='contact@pymor.org',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
-    version='2019.2rc0',
     install_requires=[],
     package_dir={'': 'src'},
     packages=find_packages('src'),
     include_package_data=True,
     ext_modules=[CMakeExtension('pymor_dealii')],
-    cmdclass={
-        'build_ext': build_ext,
-    }
+    cmdclass=cmdclass,
 )

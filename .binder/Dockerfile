@@ -5,7 +5,7 @@
 # the container, local dev needs it in path from mounted src
 # we trick docker into fulfilling both roles via a conditional ONBUILD
 # if you want to use the local dev setup, see docker/docker-compose.yml
-ARG BASE=pymor/dealii_py3.7:7008694b9b9919cce0947367c713b54d08574661
+ARG BASE=pymor/testing_py3.9:4ee2b386dc8fee933fd090d334b329103f9bc918
 ARG BUILD_ENV=binder
 
 FROM $BASE as image_binder
@@ -27,7 +27,9 @@ ARG PYMOR_JUPYTER_TOKEN
 
 USER root
 RUN useradd -d /home/pymor --shell /bin/bash -u ${NB_UID} -o -c "" -m ${NB_USER} && \
-    chown -R ${NB_USER} /home/pymor /src/ 
+    chown -R ${NB_USER} /home/pymor /src/ && \
+    apt update && \
+    apt install -y libtbb-dev
 
 RUN bash -c "([[ -e /src/setup.py ]] && pip install /src || echo 'no install needed') && pip install jupyter"
 USER ${NB_USER}

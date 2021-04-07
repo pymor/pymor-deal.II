@@ -25,9 +25,6 @@ export $(shell sed 's/=.*//' $(ENV_FILE))
 
 .PHONY: docker_file
 
-docs:
-	PYTHONPATH=${PWD}/src/:${PYTHONPATH} make -C docs html
-
 docker_file:
 	 sed -e "s;CI_IMAGE_TAG;$(CI_IMAGE_TAG);g" -e "s;DOCKER_BASE_PYTHON;$(DOCKER_BASE_PYTHON);g" \
 		 .binder/Dockerfile.in > .binder/Dockerfile
@@ -48,9 +45,12 @@ docker_tutorials: NB_DIR=docs/_build/html
 docker_tutorials: docker_docs docker_jupyter
 
 docker_test: docker_image
-	$(DOCKER_COMPOSE) up pytest
+	$(DOCKER_COMPOSE) run --service-ports jupyter /src/.ci/travis.script.bash
 
 docker_jupyter: docker_image
 	NB_DIR=$(NB_DIR) $(DOCKER_COMPOSE) up jupyter
 docker_wheel_check: docker_image
 	PYMOR_TEST_OS=$(PYMOR_TEST_OS) $(DOCKER_COMPOSE) run --service-ports wheel_check bash
+
+docs:
+	PYTHONPATH=${PWD}/src/:${PYTHONPATH} make -C docs html

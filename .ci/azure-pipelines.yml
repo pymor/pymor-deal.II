@@ -1,14 +1,14 @@
 pool:
-  vmImage: 'ubuntu-16.04'
+  vmImage: 'ubuntu-20.04'
 
 strategy:
   matrix:
-    9.2_3.6:
-      containerImage: pymor/dealii_py3.6:93e0f6225eeaae049ca3b392f77cd8d4150ee590
-    9.2_3.7:
-      containerImage: pymor/dealii_py3.7:93e0f6225eeaae049ca3b392f77cd8d4150ee590
-    9.2_3.8:
-      containerImage: pymor/dealii_py3.8:93e0f6225eeaae049ca3b392f77cd8d4150ee590
+    9.3_3.7:
+      containerImage: pymor/dealii_py3.7:7192db98b77083ef124fc0b90c4a607a258b232d
+    9.3_3.8:
+      containerImage: pymor/dealii_py3.8:7192db98b77083ef124fc0b90c4a607a258b232d
+    9.3_3.9:
+      containerImage: pymor/dealii_py3.9:7192db98b77083ef124fc0b90c4a607a258b232d
 
 container: $[ variables['containerImage'] ]
 

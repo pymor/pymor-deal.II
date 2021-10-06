@@ -12,6 +12,7 @@ BASE_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})" ; cd ../ ; pwd -P )"
 # in which the operator module is imported instead of
 # the operator module from stdlib.
 cd ${BASE_DIR}
+export CCACHE_DIR=${BASE_DIR}/cache
 git submodule update --init
 
 python -m venv ~/venv

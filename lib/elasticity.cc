@@ -133,7 +133,7 @@ void ElasticityExample::assemble_system() {
   // value 1.0. Although we could omit the respective factors in the
   // assemblage of the matrix, we use them here for purpose of
   // demonstration.
-  ConstantFunction<dim> lambda(1), mu(1);
+  Functions::ConstantFunction<dim> lambda(1), mu(1);
 
   // Then again, we need to have the same for the right hand side. This is
   // exactly as before in previous examples. However, we now have a

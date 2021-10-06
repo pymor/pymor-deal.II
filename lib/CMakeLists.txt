@@ -1,6 +1,7 @@
+cmake_minimum_required(VERSION 2.8.12)
 add_subdirectory(pybind11)
 
-FIND_PACKAGE(deal.II 8.5 QUIET CONFIG REQUIRED)
+FIND_PACKAGE(deal.II 9.2 HINTS ${deal.II_DIR} ${DEAL_II_DIR} CONFIG REQUIRED)
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
 # Create the binding library

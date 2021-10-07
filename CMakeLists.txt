@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+# this should only be necessary while the deal setup macro is copied
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "")
+
 project(pymor_dealii)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+INCLUDE(dealii_macro)
 # Set a default build configuration if none is specified. 'MinSizeRel' produces the smallest binaries
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")

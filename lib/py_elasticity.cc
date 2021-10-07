@@ -17,6 +17,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(dealii_elasticity, m) {
+  py::module::import("pymor_dealii_bindings");
 
   m.doc() = "deal.II elasticity example";
 

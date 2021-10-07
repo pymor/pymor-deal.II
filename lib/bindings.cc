@@ -20,7 +20,7 @@ template <typename Number>
 void bind_vector(pybind11::module& module) {
   typedef dealii::Vector<Number> Vector;
   typedef typename Vector::size_type size_type;
-  py::class_<Vector>(module, "Vector")
+  py::class_<Vector>(module, "Vector", py::buffer_protocol())
       .def(py::init<>())
       .def(py::init<const Vector&>())
       .def(py::init<const size_type>())

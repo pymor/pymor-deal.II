@@ -52,10 +52,10 @@ class build_ext(build_ext_orig):
             self.spawn(['cmake', '--build', '.'] + build_args)
         os.chdir(str(cwd))
 
-cmdclass=versioneer.get_cmdclass()  
+cmdclass=versioneer.get_cmdclass()
 cmdclass['build_ext'] = build_ext
 
-setup( 
+setup(
     version=versioneer.get_version(),
     name='pymor_dealii',
     author='pyMOR developers',

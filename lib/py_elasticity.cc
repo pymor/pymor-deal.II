@@ -16,9 +16,9 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(dealii_elasticity) {
+PYBIND11_MODULE(dealii_elasticity, m) {
 
-  py::module m("dealii_elasticity", "deal.II elasticity example");
+  m.doc() = "deal.II elasticity example";
 
   py::class_<ElasticityExample>(m, "ElasticityExample")
       .def(py::init<int>(), py::arg("refine_steps") = 4u)
@@ -31,6 +31,4 @@ PYBIND11_PLUGIN(dealii_elasticity) {
       .def("energy_norm", &ElasticityExample::energy_norm)
       .def("transfer_to", &ElasticityExample::transfer_to)
       .def("rhs", &ElasticityExample::rhs, py::return_value_policy::reference_internal);
-
-  return m.ptr();
 }

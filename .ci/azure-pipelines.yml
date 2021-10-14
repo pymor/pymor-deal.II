@@ -4,11 +4,11 @@ pool:
 strategy:
   matrix:
     9.3_3.7:
-      containerImage: pymor/dealii_py3.7:7192db98b77083ef124fc0b90c4a607a258b232d
+      containerImage: pymor/dealii_py3.7:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
     9.3_3.8:
-      containerImage: pymor/dealii_py3.8:7192db98b77083ef124fc0b90c4a607a258b232d
+      containerImage: pymor/dealii_py3.8:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
     9.3_3.9:
-      containerImage: pymor/dealii_py3.9:7192db98b77083ef124fc0b90c4a607a258b232d
+      containerImage: pymor/dealii_py3.9:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
 
 container: $[ variables['containerImage'] ]
 

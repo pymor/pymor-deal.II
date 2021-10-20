@@ -19,4 +19,4 @@ python -m venv ~/venv
 source ~/venv/bin/activate
 python -m pip install -U pip pytest wheel
 
-python -m install git+https://github.com/pymor/pymor.git#egg=pymor
+python -m pip install git+https://github.com/pymor/pymor.git#egg=pymor

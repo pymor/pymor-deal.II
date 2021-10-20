@@ -17,11 +17,6 @@ git submodule update --init
 
 python -m venv ~/venv
 source ~/venv/bin/activate
-pip install -U pip pytest
+python -m pip install -U pip pytest wheel build
 
-pip install git+https://github.com/pymor/pymor.git#egg=pymor
-# if we're in a versioned branch pip will downgrade pymor here from pypi
-pip install .
-
-cd ${BASE_DIR}/src/
-xvfb-run -a pytest -s -r sxX  test/demo.py
+python -m pip install git+https://github.com/pymor/pymor.git#egg=pymor

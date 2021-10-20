@@ -2,7 +2,10 @@
 
 import os
 import pathlib
-import versioneer
+import sys
+# versioneer (+dependencies) does not work in a pep518/7 context w/o modification here
+sys.path.append(os.path.dirname(__file__))
+import versioneer  # noqa
 
 from setuptools import setup, Extension
 from setuptools import find_packages
@@ -60,6 +63,7 @@ setup(
     name='pymor_dealii',
     author='pyMOR developers',
     author_email='contact@pymor.org',
+    python_requires='>=3.7',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     install_requires=[],

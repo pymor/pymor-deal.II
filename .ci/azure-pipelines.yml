@@ -13,4 +13,5 @@ strategy:
 container: $[ variables['containerImage'] ]
 
 steps:
-- script: ./.ci/travis.script.bash
+- script: ./.ci/pytest.bash
+- script: ./.ci/wheel.bash

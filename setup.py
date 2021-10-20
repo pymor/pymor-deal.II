@@ -2,7 +2,10 @@
 
 import os
 import pathlib
-import versioneer
+import sys
+# versioneer (+dependencies) does not work in a pep518/7 context w/o modification here
+sys.path.append(os.path.dirname(__file__))
+import versioneer  # noqa
 
 from setuptools import setup, Extension
 from setuptools import find_packages

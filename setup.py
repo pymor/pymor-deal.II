@@ -60,6 +60,7 @@ setup(
     name='pymor_dealii',
     author='pyMOR developers',
     author_email='contact@pymor.org',
+    python_requires='>=3.7',
     maintainer='Rene Fritze',
     maintainer_email='rene.fritze@wwu.de',
     install_requires=[],

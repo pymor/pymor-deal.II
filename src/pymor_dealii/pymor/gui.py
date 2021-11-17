@@ -7,11 +7,18 @@ from pymor.vectorarrays.interface import VectorArray
 
 
 class DealIIVisualizer(ImmutableObject):
-
     def __init__(self, impl):
         self.impl = impl
 
-    def visualize(self, U, discretization, title=None, legend=None, separate_colorbars=True, filename=None):
+    def visualize(
+        self,
+        U,
+        discretization,
+        title=None,
+        legend=None,
+        separate_colorbars=True,
+        filename=None,
+    ):
         if isinstance(U, VectorArray):
             U = [U]
         if any(len(u) != 1 for u in U):
@@ -21,12 +28,12 @@ class DealIIVisualizer(ImmutableObject):
         assert title is None or filename is None
         assert legend is None or len(legend) == len(U)
 
-        base_name = title or filename or 'out'
+        base_name = title or filename or "out"
         if len(U) == 1 and not legend:
             filenames = [base_name]
         else:
             legend = legend or list(map(str, list(range(len(U)))))
-            filenames = ['_'.join((base_name, l)) for l in legend]
+            filenames = ["_".join((base_name, l)) for l in legend]
 
         for u, n in zip(U, filenames):
-            self.impl.visualize(u._list[0].impl, n + '.vtk')
+            self.impl.visualize(u._list[0].impl, n + ".vtk")

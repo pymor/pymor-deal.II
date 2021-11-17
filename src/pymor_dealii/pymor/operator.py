@@ -43,7 +43,9 @@ class DealIIMatrixOperator(Operator):
         return R
 
     def assemble_lincomb(self, operators, coefficients, solver_options=None, name=None):
-        if not all(isinstance(op, (DealIIMatrixOperator, ZeroOperator)) for op in operators):
+        if not all(
+            isinstance(op, (DealIIMatrixOperator, ZeroOperator)) for op in operators
+        ):
             return None
         assert not solver_options  # linear solver is not yet configurable
 

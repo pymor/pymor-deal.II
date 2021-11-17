@@ -10,6 +10,12 @@ strategy:
     9.3_3.9:
       containerImage: pymor/dealii_py3.9:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
 
+schedules:
+- cron: "0 12 * * 1"
+  displayName: Weekly build
+  branches:
+    include:
+      - main
 container: $[ variables['containerImage'] ]
 
 steps:

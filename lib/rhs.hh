@@ -98,8 +98,8 @@ inline void RightHandSide<dim>::vector_value(const Point<dim>& p, Vector<double>
   // If now the point <code>p</code> is in a circle (sphere) of radius 0.2
   // around one of these points, then set the force in x-direction to one,
   // otherwise to zero:
-  if ((static_cast<Point<dim>>(p - point_1).square() < 0.2 * 0.2)
-      || (static_cast<Point<dim>>(p - point_2).norm_square() < 0.2 * 0.2))
+  if ((static_cast<Point<dim>>(p - point_1).square() < 0.2 * 0.2) ||
+      (static_cast<Point<dim>>(p - point_2).norm_square() < 0.2 * 0.2))
     values(0) = 1;
   else
     values(0) = 0;

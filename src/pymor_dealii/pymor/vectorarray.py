@@ -4,6 +4,7 @@
 
 try:
     import pymor_dealii_bindings as pd2
+
     HAVE_DEALII = True
 except ImportError:
     HAVE_DEALII = False
@@ -46,7 +47,7 @@ class DealIIVector(CopyOnWriteVector):
         if x.dim == 0:
             return
         if x is self:
-            self.impl *= 1. + alpha
+            self.impl *= 1.0 + alpha
         else:
             self.impl.axpy(alpha, x.impl)
 
@@ -61,7 +62,7 @@ class DealIIVector(CopyOnWriteVector):
         return 0 if self.dim == 0 else self.impl.l2_norm()
 
     def norm2(self):
-        return 0 if self.dim == 0 else self.impl.l2_norm()**2
+        return 0 if self.dim == 0 else self.impl.l2_norm() ** 2
 
     def sup_norm(self):
         return 0 if self.dim == 0 else self.impl.linfty_norm()
@@ -103,12 +104,15 @@ class DealIIVector(CopyOnWriteVector):
 
 
 class DealIIVectorSpace(ListVectorSpace):
-
     def __init__(self, dim, id=None):
         self.__auto_init(locals())
 
     def __eq__(self, other):
-        return type(other) is DealIIVectorSpace and self.dim == other.dim and self.id == other.id
+        return (
+            type(other) is DealIIVectorSpace
+            and self.dim == other.dim
+            and self.id == other.id
+        )
 
     @classmethod
     def space_from_vector_obj(cls, vec, id):

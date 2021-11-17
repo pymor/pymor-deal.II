@@ -2,9 +2,9 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-import pytest
 import numpy as np
 import pydealii_bindings as dealii
+
 
 def test_vector():
     v = dealii.Vector(10)
@@ -38,9 +38,10 @@ def test_vector():
     ddones[:] = np.ones((100,), np.double)
     npdd = np.array(ddones, copy=False)
     assert np.allclose(npdd, np.ones((100,), dtype=np.double))
-    npdd += 1.
-    ddones /= 2.
+    npdd += 1.0
+    ddones /= 2.0
     assert np.allclose(npdd, ddones)
+
 
 if __name__ == "__main__":
     test_vector()

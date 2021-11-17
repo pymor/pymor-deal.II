@@ -1,17 +1,24 @@
-# homepage: https://github.com/gaurav-nelson/github-action-markdown-link-check
-name: Check Markdown links
-
 on: [pull_request]
 
+name: Checks
+
 jobs:
-  markdown-link-check:
+  git:
+    name: Block Autosquash Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block Autosquash Commits
+        uses: xt0rted/block-autosquash-commits-action@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+  source:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: markdown-link-check
       uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
-
       with:
         use-verbose-mode: 'yes'
         check-modified-files-only: 'yes'
         base-branch: 'main'
+    - uses: pre-commit/action@v2.0.3

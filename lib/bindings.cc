@@ -2,7 +2,6 @@
 // Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 // License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
 #include <deal.II/lac/precondition.h>
 #include <deal.II/lac/solver_cg.h>
@@ -145,7 +144,7 @@ void bind_sparse_matrix(pybind11::module& module) {
       .def("vmult", &Matrix::template vmult<Vector, Vector>)
       .def("Tvmult", &Matrix::template Tvmult<Vector, Vector>)
       .def("get_sparsity_pattern", &Matrix::get_sparsity_pattern, py::return_value_policy::reference)
-      .def("add", (void (Matrix::*)(Number, const Matrix&)) & Matrix::template add<Number>)
+      .def("add", (void(Matrix::*)(Number, const Matrix&)) & Matrix::template add<Number>)
       .def("copy_from", (Matrix & (Matrix::*)(const Matrix&)) & Matrix::template copy_from<Number>)
       .def("cg_solve", cg_solve);
 }

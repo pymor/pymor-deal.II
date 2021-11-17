@@ -1,16 +1,16 @@
-# setup.py with cmake extension following https://stackoverflow.com/questions/42585210/extending-setuptools-extension-to-use-cmake-in-setup-py
+# setup.py with cmake extension following
+# https://stackoverflow.com/questions/42585210/
 
 import os
 import pathlib
 import sys
+from setuptools import setup, Extension
+from setuptools import find_packages
+from setuptools.command.build_ext import build_ext as build_ext_orig
 
 # versioneer (+dependencies) does not work in a pep518/7 context w/o modification here
 sys.path.append(os.path.dirname(__file__))
 import versioneer  # noqa
-
-from setuptools import setup, Extension
-from setuptools import find_packages
-from setuptools.command.build_ext import build_ext as build_ext_orig
 
 
 class CMakeExtension(Extension):

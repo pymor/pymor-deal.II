@@ -4,16 +4,12 @@
 
 from pymor.basic import *
 
-# instantiate deal.II model
-from dealii_elasticity import ElasticityExample
-
-cpp_disc = ElasticityExample(refine_steps=7)
-
-
-# wrap as pyMOR discretization
 from pymor_dealii.pymor.operator import DealIIMatrixOperator
 from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
 from pymor_dealii.pymor.gui import DealIIVisualizer
+from dealii_elasticity import ElasticityExample
+
+cpp_disc = ElasticityExample(refine_steps=7)
 
 
 def run(plot_error=True):

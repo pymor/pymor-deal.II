@@ -75,8 +75,9 @@ class DealIIVector(CopyOnWriteVector):
         return np.array([self.impl[i] for i in dof_indices])
 
     def amax(self):
-        max_ind = np.argmax(self.impl)
-        return max_ind, self.impl[max_ind]
+        A = np.abs(self.to_numpy())
+        max_ind = np.argmax(A)
+        return max_ind, A[max_ind]
 
     def __add__(self, other):
         return DealIIVector(self.impl + other.impl)

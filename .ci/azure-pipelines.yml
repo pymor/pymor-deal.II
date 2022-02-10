@@ -21,3 +21,4 @@ container: $[ variables['containerImage'] ]
 steps:
 - script: ./.ci/pytest.bash
 - script: ./.ci/wheel.bash
+- script: ./.ci/install.bash

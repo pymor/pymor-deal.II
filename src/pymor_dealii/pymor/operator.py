@@ -33,7 +33,7 @@ class DealIIMatrixOperator(Operator):
             self.matrix.Tvmult(r.impl, u.impl)
         return U
 
-    def apply_inverse(self, V, mu=None, least_squares=False):
+    def apply_inverse(self, V, mu=None, initial_guess=None, least_squares=False):
         assert V in self.range
         if least_squares:
             raise NotImplementedError

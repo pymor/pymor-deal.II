@@ -1,23 +1,18 @@
-pool:
-  vmImage: 'ubuntu-20.04'
-
-strategy:
-  matrix:
-    9.3_3.7:
-      containerImage: pymor/dealii_py3.7:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
-    9.3_3.8:
-      containerImage: pymor/dealii_py3.8:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
-    9.3_3.9:
-      containerImage: pymor/dealii_py3.9:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
-
 schedules:
 - cron: "0 12 * * 1"
   displayName: Weekly build
   branches:
     include:
       - main
-container: $[ variables['containerImage'] ]
 
-steps:
-- script: ./.ci/pytest.bash
-- script: ./.ci/wheel.bash
+jobs:
+  - template: job-template.yml
+    parameters:
+      script: pytest
+  - template: job-template.yml
+    parameters:
+      script: wheel
+  # this currently fails on azure, but works locally
+  # - template: job-template.yml
+  #   parameters:
+  #     script: install

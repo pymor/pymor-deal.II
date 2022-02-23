@@ -3,7 +3,6 @@
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
 from pymor.operators.interface import Operator
-from pymor.operators.constructions import ZeroOperator
 
 from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
 import pymor_dealii_bindings as pd2
@@ -33,7 +32,7 @@ class DealIIMatrixOperator(Operator):
             self.matrix.Tvmult(r.impl, u.impl)
         return U
 
-    def apply_inverse(self, V, mu=None, least_squares=False):
+    def apply_inverse(self, V, mu=None, initial_guess=None, least_squares=False):
         assert V in self.range
         if least_squares:
             raise NotImplementedError
@@ -42,10 +41,17 @@ class DealIIMatrixOperator(Operator):
             self.matrix.cg_solve(r.impl, v.impl)
         return R
 
-    def assemble_lincomb(self, operators, coefficients, solver_options=None, name=None):
-        if not all(
-            isinstance(op, (DealIIMatrixOperator, ZeroOperator)) for op in operators
-        ):
+    def _assemble_lincomb(
+        self,
+        operators,
+        coefficients,
+        identity_shift=0.0,
+        solver_options=None,
+        name=None,
+    ):
+        if not all(isinstance(op, (DealIIMatrixOperator)) for op in operators):
+            return None
+        if identity_shift != 0.0:
             return None
         assert not solver_options  # linear solver is not yet configurable
 
@@ -53,7 +59,5 @@ class DealIIMatrixOperator(Operator):
         matrix.copy_from(operators[0].matrix)
         matrix *= coefficients[0]
         for op, c in zip(operators[1:], coefficients[1:]):
-            if isinstance(op, ZeroOperator):
-                continue
             matrix.add(c, op.matrix)
         return DealIIMatrixOperator(matrix, name=name)

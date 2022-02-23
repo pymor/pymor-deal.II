@@ -2,3 +2,7 @@
 build
 CMakeLists.txt.user
 .idea
+.vscode
+cache
+__pycache__
+

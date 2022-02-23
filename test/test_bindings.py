@@ -3,7 +3,7 @@
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
 import numpy as np
-import pydealii_bindings as dealii
+import pymor_dealii_bindings as dealii
 
 
 def test_vector():

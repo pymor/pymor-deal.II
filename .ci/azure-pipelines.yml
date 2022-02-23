@@ -4,11 +4,11 @@ pool:
 strategy:
   matrix:
     9.3_3.7:
-      containerImage: pymor/dealii_py3.7:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
+      containerImage: pymor/dealii_py3.7:47f2bf40dd49a64292e482b59fe6631101fdcc2b
     9.3_3.8:
-      containerImage: pymor/dealii_py3.8:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
+      containerImage: pymor/dealii_py3.8:47f2bf40dd49a64292e482b59fe6631101fdcc2b
     9.3_3.9:
-      containerImage: pymor/dealii_py3.9:8b53a0c0ef5397576c1f9800e5e0ad3008536ea8
+      containerImage: pymor/dealii_py3.9:47f2bf40dd49a64292e482b59fe6631101fdcc2b
 
 schedules:
 - cron: "0 12 * * 1"

@@ -27,7 +27,7 @@ ARG PYMOR_JUPYTER_TOKEN
 
 USER root
 # RUN useradd -d /home/pymor --shell /bin/bash -u ${NB_UID} -o -c "" -m ${NB_USER} && \
-#     chown -R ${NB_USER} /home/pymor /src/ 
+#     chown -R ${NB_USER} /home/pymor /src/
 
 # # RUN bash -c "([[ -e /src/setup.py ]] && pip install /src || echo 'no install needed') && pip install jupyter"
 # USER ${NB_USER}

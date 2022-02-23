@@ -21,3 +21,9 @@ Development notes
 We have a `pre-commit` config that is also run/checked in CI.
 Python source is formatted with `black`.
 C++ source is formatted with `clang-format`.
+
+Dependencies for running the test suite can be installed with
+
+```
+python -m pip install -r ./.ci/requirements-ci.txt
+```

@@ -1,24 +1,17 @@
-pool:
-  vmImage: 'ubuntu-20.04'
-
-strategy:
-  matrix:
-    9.3_3.7:
-      containerImage: pymor/dealii_py3.7:47f2bf40dd49a64292e482b59fe6631101fdcc2b
-    9.3_3.8:
-      containerImage: pymor/dealii_py3.8:47f2bf40dd49a64292e482b59fe6631101fdcc2b
-    9.3_3.9:
-      containerImage: pymor/dealii_py3.9:47f2bf40dd49a64292e482b59fe6631101fdcc2b
-
 schedules:
 - cron: "0 12 * * 1"
   displayName: Weekly build
   branches:
     include:
       - main
-container: $[ variables['containerImage'] ]
 
-steps:
-- script: ./.ci/pytest.bash
-- script: ./.ci/wheel.bash
-- script: ./.ci/install.bash
+jobs:
+  - template: job-template.yml
+    parameters:
+      script: pytest
+  - template: job-template.yml
+    parameters:
+      script: wheel
+  - template: job-template.yml
+    parameters:
+      script: install

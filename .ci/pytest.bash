@@ -10,5 +10,5 @@ source ${BASE_DIR}/.ci/common_setup.bash
 # if we're in a versioned branch pip will downgrade pymor here from pypi
 python -m pip install .
 
-cd ${BASE_DIR}/src/
-xvfb-run -a pytest -s -r sxX  test/demo.py
+cd ${BASE_DIR}
+xvfb-run -a pytest -s -r sxX  test/

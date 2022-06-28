@@ -9,8 +9,6 @@ jobs:
 
   strategy:
     matrix:
-      9.3_3.7:
-        containerImage: pymor/dealii_py3.7:47f2bf40dd49a64292e482b59fe6631101fdcc2b
       9.3_3.8:
         containerImage: pymor/dealii_py3.8:47f2bf40dd49a64292e482b59fe6631101fdcc2b
       9.3_3.9:

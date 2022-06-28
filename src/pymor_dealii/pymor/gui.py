@@ -37,5 +37,5 @@ class DealIIVisualizer(ImmutableObject):
         for u, n in zip(U, filenames):
             uu = u.vectors[0]
             if uu.imag_part is not None:
-                self.logger.warning('Imaginary part ignored.')
+                self.logger.warning("Imaginary part ignored.")
             self.impl.visualize(uu.real_part.impl, n + ".vtk")

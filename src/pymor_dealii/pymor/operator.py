@@ -21,7 +21,9 @@ class DealIIMatrixOperator(LinearComplexifiedListVectorArrayOperatorBase):
         self.matrix.vmult(r.impl, u.impl)
         return r
 
-    def _real_apply_inverse_one_vector(self, v, mu=None, initial_guess=None, least_squares=False, prepare_data=None):
+    def _real_apply_inverse_one_vector(
+        self, v, mu=None, initial_guess=None, least_squares=False, prepare_data=None
+    ):
         if least_squares:
             raise NotImplementedError
         r = self.source.real_zero_vector()

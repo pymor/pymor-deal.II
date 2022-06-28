@@ -13,7 +13,6 @@ class DealIIVisualizer(ImmutableObject):
     def visualize(
         self,
         U,
-        discretization,
         title=None,
         legend=None,
         separate_colorbars=True,
@@ -36,4 +35,7 @@ class DealIIVisualizer(ImmutableObject):
             filenames = ["_".join((base_name, l)) for l in legend]
 
         for u, n in zip(U, filenames):
-            self.impl.visualize(u._list[0].impl, n + ".vtk")
+            uu = u.vectors[0]
+            if uu.imag_part is not None:
+                self.logger.warning("Imaginary part ignored.")
+            self.impl.visualize(uu.real_part.impl, n + ".vtk")

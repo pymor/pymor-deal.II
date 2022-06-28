@@ -2,44 +2,38 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
-from pymor.operators.interface import Operator
+from pymor.operators.list import LinearComplexifiedListVectorArrayOperatorBase
 
 from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
 import pymor_dealii_bindings as pd2
 
 
-class DealIIMatrixOperator(Operator):
+class DealIIMatrixOperator(LinearComplexifiedListVectorArrayOperatorBase):
     """Wraps a dealII matrix as an |Operator|."""
-
-    linear = True
 
     def __init__(self, matrix, name=None):
         self.source = DealIIVectorSpace(matrix.m())
         self.range = DealIIVectorSpace(matrix.n())
         self.__auto_init(locals())
 
-    def apply(self, U, mu=None):
-        assert U in self.source
-        R = self.range.zeros(len(U))
-        for u, r in zip(U._list, R._list):
-            self.matrix.vmult(r.impl, u.impl)
-        return R
+    def _real_apply_one_vector(self, u, mu=None, prepare_data=None):
+        r = self.range.real_zero_vector()
+        self.matrix.vmult(r.impl, u.impl)
+        return r
 
-    def apply_transpose(self, V, mu=None):
-        assert V in self.range
-        U = self.source.zeros(len(V))
-        for u, r in zip(V._list, U._list):
-            self.matrix.Tvmult(r.impl, u.impl)
-        return U
-
-    def apply_inverse(self, V, mu=None, initial_guess=None, least_squares=False):
-        assert V in self.range
+    def _real_apply_inverse_one_vector(
+        self, v, mu=None, initial_guess=None, least_squares=False, prepare_data=None
+    ):
         if least_squares:
             raise NotImplementedError
-        R = self.source.zeros(len(V))
-        for r, v in zip(R._list, V._list):
-            self.matrix.cg_solve(r.impl, v.impl)
-        return R
+        r = self.source.real_zero_vector()
+        self.matrix.cg_solve(r.impl, v.impl)
+        return r
+
+    def _real_apply_adjoint_one_vector(self, v, mu=None, prepare_data=None):
+        r = self.source.real_zero_vector()
+        self.matrix.Tvmult(r.impl, v.impl)
+        return r
 
     def _assemble_lincomb(
         self,

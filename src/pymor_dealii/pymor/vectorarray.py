@@ -11,7 +11,7 @@ except ImportError:
 
 import numpy as np
 
-from pymor.vectorarrays.list import ListVectorSpace, CopyOnWriteVector
+from pymor.vectorarrays.list import ComplexifiedListVectorSpace, CopyOnWriteVector
 
 
 class DealIIVector(CopyOnWriteVector):
@@ -104,7 +104,10 @@ class DealIIVector(CopyOnWriteVector):
         return DealIIVector(-self.impl)
 
 
-class DealIIVectorSpace(ListVectorSpace):
+class DealIIVectorSpace(ComplexifiedListVectorSpace):
+
+    real_vector_type = DealIIVector
+
     def __init__(self, dim, id=None):
         self.__auto_init(locals())
 
@@ -123,13 +126,13 @@ class DealIIVectorSpace(ListVectorSpace):
     def space_from_dim(cls, dim, id):
         return cls(dim, id)
 
-    def zero_vector(self):
+    def real_zero_vector(self):
         return DealIIVector(pd2.Vector(self.dim))
 
-    def make_vector(self, obj):
+    def real_make_vector(self, obj):
         return DealIIVector(obj)
 
-    def vector_from_numpy(self, data, ensure_copy=False):
-        v = self.zero_vector()
+    def real_vector_from_numpy(self, data, ensure_copy=False):
+        v = self.real_zero_vector()
         v.to_numpy()[:] = data
         return v

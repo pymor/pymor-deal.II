@@ -48,6 +48,10 @@ class DealIIVector(CopyOnWriteVector):
             return
         if x is self:
             self.impl *= 1.0 + alpha
+        elif x == 1:
+            self.impl += x.impl
+        elif x == -1:
+            self.impl -= x.impl
         else:
             self.impl.axpy(alpha, x.impl)
 
@@ -78,16 +82,6 @@ class DealIIVector(CopyOnWriteVector):
         A = np.abs(self.to_numpy())
         max_ind = np.argmax(A)
         return max_ind, A[max_ind]
-
-    def __iadd__(self, other):
-        self._copy_data_if_needed()
-        self.impl += other.impl
-        return self
-
-    def __isub__(self, other):
-        self._copy_data_if_needed()
-        self.impl -= other.impl
-        return self
 
 
 class DealIIVectorSpace(ComplexifiedListVectorSpace):

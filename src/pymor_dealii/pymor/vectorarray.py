@@ -79,29 +79,15 @@ class DealIIVector(CopyOnWriteVector):
         max_ind = np.argmax(A)
         return max_ind, A[max_ind]
 
-    def __add__(self, other):
-        return DealIIVector(self.impl + other.impl)
-
     def __iadd__(self, other):
         self._copy_data_if_needed()
         self.impl += other.impl
         return self
 
-    __radd__ = __add__
-
-    def __sub__(self, other):
-        return DealIIVector(self.impl - other.impl)
-
     def __isub__(self, other):
         self._copy_data_if_needed()
         self.impl -= other.impl
         return self
-
-    def __mul__(self, other):
-        return DealIIVector(self.impl * other)
-
-    def __neg__(self):
-        return DealIIVector(-self.impl)
 
 
 class DealIIVectorSpace(ComplexifiedListVectorSpace):

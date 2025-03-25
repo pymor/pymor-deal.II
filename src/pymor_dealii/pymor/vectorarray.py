@@ -88,23 +88,22 @@ class DealIIVectorSpace(ComplexifiedListVectorSpace):
 
     real_vector_type = DealIIVector
 
-    def __init__(self, dim, id=None):
+    def __init__(self, dim):
         self.__auto_init(locals())
 
     def __eq__(self, other):
         return (
             type(other) is DealIIVectorSpace
             and self.dim == other.dim
-            and self.id == other.id
         )
 
     @classmethod
-    def space_from_vector_obj(cls, vec, id):
-        return cls(vec.size(), id)
+    def space_from_vector_obj(cls, vec):
+        return cls(vec.size())
 
     @classmethod
-    def space_from_dim(cls, dim, id):
-        return cls(dim, id)
+    def space_from_dim(cls, dim):
+        return cls(dim)
 
     def real_zero_vector(self):
         return DealIIVector(pd2.Vector(self.dim))

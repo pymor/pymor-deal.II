@@ -1,6 +1,0 @@
-pytest
-wheel
-build
-pytest
-pytest-regressions
-pandas

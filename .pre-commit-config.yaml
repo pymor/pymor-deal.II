@@ -19,3 +19,6 @@ repos:
       hooks:
       -   id: clang-format
           exclude: "^lib/pybind11"
+ci:
+  autofix_prs: false
+  autoupdate_schedule: quarterly

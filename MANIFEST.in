@@ -1,7 +1,0 @@
-graft lib
-graft src
-include CMakeLists.txt
-include README.md
-include LICENSE
-include versioneer.py
-include src/pymor_dealii/version.py

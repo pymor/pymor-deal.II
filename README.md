@@ -1,29 +1,15 @@
-Requirements
-============
+# pyMOR bindings for deal.II
 
-`deal.II` with development headers
+This repository contains basic pyMOR binding for the [deal.II](https://dealii.org) Finite Element library.
 
-Usage
-=====
-
+## Installation
+A working deal.II installation is required. On Debian/Ubuntu, deal.II can be installed as follows:
 ```
-git clone --recurse-submodules https://github.com/pymor/pymor-deal.II
-cd pymor-deal.II
-python -m pip install pymor
+sudo apt install libdeal.ii-dev
+```
+
+Install and run demo script:
+```
 python -m pip install -e .
-python test/demo.py
-```
-
-
-Development notes
-=================
-
-We have a `pre-commit` config that is also run/checked in CI.
-Python source is formatted with `black`.
-C++ source is formatted with `clang-format`.
-
-Dependencies for running the test suite can be installed with
-
-```
-python -m pip install -r ./.ci/requirements-ci.txt
+python ./src/pymor_dealii/pymor/demo.py
 ```

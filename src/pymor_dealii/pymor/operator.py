@@ -2,10 +2,10 @@
 # Copyright 2013-2018 pyMOR developers and contributors. All rights reserved.
 # License: BSD 2-Clause License (http://opensource.org/licenses/BSD-2-Clause)
 
+import pymor_dealii_bindings as pd2
 from pymor.operators.list import LinearComplexifiedListVectorArrayOperatorBase
 
 from pymor_dealii.pymor.vectorarray import DealIIVectorSpace
-import pymor_dealii_bindings as pd2
 
 
 class DealIIMatrixOperator(LinearComplexifiedListVectorArrayOperatorBase):

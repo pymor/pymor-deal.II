@@ -10,7 +10,6 @@ except ImportError:
     HAVE_DEALII = False
 
 import numpy as np
-
 from pymor.vectorarrays.list import ComplexifiedListVectorSpace, CopyOnWriteVector
 
 

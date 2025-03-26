@@ -27,15 +27,15 @@ class DealIIVisualizer(ImmutableObject):
         assert title is None or filename is None
         assert legend is None or len(legend) == len(U)
 
-        base_name = title or filename or "out"
+        base_name = title or filename or 'out'
         if len(U) == 1 and not legend:
             filenames = [base_name]
         else:
             legend = legend or list(map(str, list(range(len(U)))))
-            filenames = ["_".join((base_name, l)) for l in legend]
+            filenames = ['_'.join((base_name, l)) for l in legend]
 
         for u, n in zip(U, filenames):
             uu = u.vectors[0]
             if uu.imag_part is not None:
-                self.logger.warning("Imaginary part ignored.")
-            self.impl.visualize(uu.real_part.impl, n + ".vtk")
+                self.logger.warning('Imaginary part ignored.')
+            self.impl.visualize(uu.real_part.impl, n + '.vtk')

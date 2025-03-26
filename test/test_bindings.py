@@ -43,5 +43,5 @@ def test_vector():
     assert np.allclose(npdd, ddones)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_vector()
